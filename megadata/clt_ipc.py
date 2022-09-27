@@ -5,7 +5,8 @@ def on_quit(*a):
   os._exit(0)
 hook_quit(on_quit)
 
-def clt_ipc(argv,argc):
+def clt_ipc(argv):
+  argc = len(argv)
   address = build_address(argv[1], argv[2] if argc>2 else None)
 
   out={}
@@ -43,4 +44,4 @@ def clt_ipc(argv,argc):
       print(type(rt),'=>',rt)
 
 if __name__ == '__main__':
-  clt_ipc(argv,argc)
+  clt_ipc(argv)

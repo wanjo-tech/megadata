@@ -1,2 +1,3 @@
 /dist
 *.egg-info/
+/megadata/__pycache__/*.pyc

@@ -1,4 +1,4 @@
-from .mypy import *
+from megadata.mypy import *
 
 def on_quit(*a):
   print('on_quit',*a)
@@ -11,7 +11,9 @@ def clt_ipc(argv):
   print('address=',address)
 
   out={}
-  server= lambda v: ipc(address, v, out=out)
+  #server= lambda v: ipc(address, v, out=out)
+  def server(v):
+    return ipc(address,v,out=out)
 
   import pickle
   for line in sys.stdin:
@@ -32,8 +34,9 @@ def clt_ipc(argv):
     # ;type(ipc(r'\\.\pipe\ipctest','algodata.dao,20220704'))
     # ;server('algodata.dao,20220704')
     # ;server('(api)')('Adm','ping')
+    # ;server("""(api('algodata','dfb',20220704))""").shape
     elif line.startswith(';'):
-      print( tryx(lambda:eval(line[1:])) )
+      print( tryx(lambda:eval(line[1:],globals(),{'server':server})) )
       #print(out.keys())
 
     # e.g.

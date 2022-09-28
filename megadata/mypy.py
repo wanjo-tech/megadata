@@ -147,20 +147,6 @@ def ipc(u,data,authkey=None,out=None):
     return rt_loads
   return rt
 
-#def rpc(u,data):
-#  s = data
-#
-#  from multiprocessing.connection import Client
-#  conn = Client(u)
-#
-#  conn.send(s)
-#  rt = conn.recv()
-#  tryx(conn.close)
-#  if type(rt) is bytes:
-#    import pickle
-#    rt = pickle.loads(rt)
-#  return rt
-
 read = lambda f,m='r',encoding='utf-8':open(f,m,encoding=encoding).read()
 # for binary: write(f,s,'wb',None)
 write = lambda f,s,m='w',encoding='utf-8':open(f,m,encoding=encoding).write(s)
@@ -188,15 +174,6 @@ class objx(dict):#dictxx
     def __getitem__(self,key): return self.get(key)
     def __getattr__(self,key): return self[key]
     def __setattr__(self,k,v): self[k]=v
-
-class dict1(dict):# dict[]
-    def __getitem__(self,k): return self.get(k)
-
-class dict2(dict):# dict[][]
-    def __getitem__(self,k):
-        v = self.get(k)
-        if v is None: self[k] = v = dict1()
-        return v
 
 class probe:
     def __init__(self,ev): self._ev=ev
@@ -237,9 +214,6 @@ def time_maker(days=0,date=None,outfmt=None,infmt='%Y-%m-%d',
         return int(mktime(_dt.timetuple()))
     return _dt.strftime(outfmt)
 
-# alias for old codes ;)
-time_add = time_maker
-
 #e.g. acct_num = re_match(r'\D*(\d*)',str(acct))
 import re
 re_match=lambda p,s,a=re.M|re.I:(re.search(p, s, a) or [None,None])[1]
@@ -248,35 +222,6 @@ re_replace=lambda p,needle,hay,a=re.M|re.I:re.sub(p, needle, hay, a)
 
 # e.g. attachment_data = read('QR.png','rb',None)
 # TODO support list of attachment_data/attachment_name later
-def tiny_email(user, mypass, sender, receiver, Subject, html, smtp_host='smtp.qq.com', smtp_port=465, Cc='', Bcc='',attachment_data=None,attachment_name=None):
-    import smtplib
-    from email.mime.text import MIMEText
-    if attachment_name and attachment_data:
-      from email.mime.multipart import MIMEMultipart
-      msg=MIMEMultipart('mixed')
-      att=MIMEText(attachment_data,'base64','utf-8')
-      att['Content-Type']='application/octet-stream'
-      att['Content-Disposition']='attachement; filename='+attachment_name
-      msg.attach(att)
-    else:
-      msg=MIMEText(html,'html','utf-8')
-    msg['From'] = sender
-    if type(receiver) is str:
-        receiver_a = [receiver,]
-        receiver_s = receiver
-    else:#iterable
-        receiver_a = receiver
-        receiver_s = ';'.join([str(v) for v in receiver])
-    msg['To'] = receiver_s
-    msg['Subject']= Subject
-    msg['Cc'] = Cc
-    msg['Bcc'] = Bcc
-    receiver_a += [Cc,Bcc]
-
-    server=smtplib.SMTP_SSL(smtp_host, smtp_port) 
-    server.login(user, mypass)
-    server.sendmail(sender, receiver_a, msg.as_string())
-    server.quit()
 
 import multiprocessing
 def parallel(func, a, pool_size=None,chunksize=None,mode='default',map_async=False):

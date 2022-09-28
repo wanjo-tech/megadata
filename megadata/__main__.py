@@ -6,8 +6,8 @@ import warnings
 # of sys.path, if present to avoid using current directory
 # in pip commands check, freeze, install, list and show,
 # when invoked as python -m pip <command>
-#if sys.path[0] in ("", os.getcwd()):
-#    sys.path.pop(0)
+if sys.path[0] in ("", os.getcwd()):
+    sys.path.pop(0)
 
 # If we are running from a wheel, add the wheel to sys.path
 # This allows the usage python pip-*.whl/pip install pip-*.whl
@@ -27,8 +27,7 @@ def main(argv):
   clt_ipc(argv)
 
 if __name__ == "__main__":
-  #from megadata.mypy import *
-  from .mypy import argv
+  from megadata.mypy import argv
 
   # TODO python -m megadata clt ipcft .
   main(argv[1:])

@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-# py-coding-simplifer by Wanjo 20221008
+# py-coding-simplifer by Wanjo 20221009
 
 from __future__ import print_function # for py2: no more print ... allow but print()
 
@@ -44,6 +44,22 @@ def file_rename(fnold,fnnew=None,try_delete_after=False):
         tryx(lambda:os.remove(fnnew))
 
 evalx = lambda s,g=globals():eval(s,g)
+
+class probe:
+    def __init__(self,ev): self._ev=ev
+    def __getattr__(self,k): return tryx(lambda:self._ev(k))
+
+class probex:
+    def __init__(self,ev,debug=False):
+      self._ev=ev
+      self.debug = debug
+    def __getattr__(self,k):
+      rt = tryx(lambda:self._ev(k),self.debug)
+      if rt is None: rt = tryx(lambda:sys_import(k),self.debug)
+      return rt
+
+# from megadata.mypy import mypy
+mypy = probex(evalx)
 
 flag_py2 = sys.version_info.major==2
 if not flag_py2:
@@ -177,22 +193,6 @@ class objx(dict):#dictxx
     def __getattr__(self,key): return self[key]
     def __setattr__(self,k,v): self[k]=v
 
-class probe:
-    def __init__(self,ev): self._ev=ev
-    def __getattr__(self,k): return tryx(lambda:self._ev(k))
-
-class probex:
-    def __init__(self,ev,debug=False):
-      self._ev=ev
-      self.debug = debug
-    def __getattr__(self,k):
-      rt = tryx(lambda:self._ev(k),self.debug)
-      if rt is None: rt = tryx(lambda:sys_import(k),self.debug)
-      return rt
-
-# from megadata.mypy import mypy
-mypy = probex(evalx)
-
 def on_quit_default(*a):
   print(*a)
   os._exit(0)
@@ -291,9 +291,8 @@ def mygc():
     gc.collect()
     return len(gc.get_objects())
 
-def md5(s):
-  import hashlib
-  return hashlib.md5(bytes(s,encoding='utf8')).hexdigest()
+#def md5(s):return mypy.hashlib.md5(bytes(s,encoding='utf8')).hexdigest()
+md5=lambda s:mypy.hashlib.md5(bytes(s,encoding='utf8')).hexdigest()
 
 def yielder(func,wrap=tryx,do_yield=True): yield (wrap(func) if wrap else func())
 def yielder_loop(func,wrap=tryx,do_yield=True):
@@ -301,11 +300,12 @@ def yielder_loop(func,wrap=tryx,do_yield=True):
     rt = yield from yielder(func, wrap, do_yield)
     if do_yield and rt is not None: yield rt
 
-import threading
-Thread = threading.Thread
+#import threading
+#Thread = threading.Thread
+Thread = mypy.threading.Thread
 #try_async=lambda func:tryx(lambda:threading.Thread(target=func).start())
-def try_async(func):
-  Thread(target=func).start()
+#try_async=lambda func:Thread(target=func).start()
+def try_async(func): Thread(target=func).start()
 
 #import asyncio
 #new_event_loop = asyncio.new_event_loop

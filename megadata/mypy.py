@@ -1,8 +1,10 @@
 #-*- coding: utf-8 -*-
 
-# py-coding-simplifer by Wanjo 20220926
+# py-coding-simplifer by Wanjo 20221008
 
-from __future__ import print_function # for py2
+from __future__ import print_function # for py2: no more print ... allow but print()
+
+# alias of the print
 _print=print
 
 from time import time as now, mktime, sleep, ctime
@@ -10,6 +12,7 @@ from time import time as now, mktime, sleep, ctime
 load_time = now()
 
 #exec('def tryx(l,e=print):\n try:return l()\n except Exception as ex:return ex if True==e else e(ex) if e else None')
+# core of mypy
 def tryx(l,e=print):
     try: return l()
     except Exception as ex: return ex if True==e else e(ex) if e else None
@@ -24,8 +27,6 @@ log2 = sys.stderr.write
 flush2 = sys.stderr.flush
 
 def print1(*args):
-  len_args = len(args)
-  #for v in args: log1(f'{v}{" " if len_args>0 else ""}')
   for v in args: log1(f'{v} ')
   log1('\n')
   flush1()
@@ -43,6 +44,7 @@ def file_rename(fnold,fnnew=None,try_delete_after=False):
         tryx(lambda:os.remove(fnnew))
 
 evalx = lambda s,g=globals():eval(s,g)
+
 flag_py2 = sys.version_info.major==2
 if not flag_py2:
     # https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading/22253656#22253656
@@ -88,7 +90,7 @@ def get_urlopen():
 wc=lambda u=None, data=None, m='POST', timeout=10:get_urlopen()(url=u,data=data.encode('utf-8') if isinstance(data,str) else o2s(data).encode('utf-8') if data else None,timeout=timeout).read().decode()
 
 # NOTES: one-off ws call, not for heavy usage!!!
-# TODO: need to fix for better situation for the non-blocking...
+# TODO: need to fix for non-blocking...
 def wsc(u,data,lines=1):
   s=data.encode('utf-8') if isinstance(data,str) else o2s(data).encode('utf-8') if data else None
 
@@ -177,10 +179,19 @@ class objx(dict):#dictxx
 
 class probe:
     def __init__(self,ev): self._ev=ev
-    def __getattr__(self,k): return self._ev(k)
-    #def __setattr__(self,k,v):self[k]=v # todo
+    def __getattr__(self,k): return tryx(lambda:self._ev(k))
 
-mypy = probe(evalx)
+class probex:
+    def __init__(self,ev,debug=False):
+      self._ev=ev
+      self.debug = debug
+    def __getattr__(self,k):
+      rt = tryx(lambda:self._ev(k),self.debug)
+      if rt is None: rt = tryx(lambda:sys_import(k),self.debug)
+      return rt
+
+# from megadata.mypy import mypy
+mypy = probex(evalx)
 
 def on_quit_default(*a):
   print(*a)
@@ -296,13 +307,11 @@ Thread = threading.Thread
 def try_async(func):
   Thread(target=func).start()
 
-import asyncio
-new_event_loop = asyncio.new_event_loop
+#import asyncio
+#new_event_loop = asyncio.new_event_loop
+from asyncio import new_event_loop
 def try_asyncio(func):
   new_event_loop().run_in_executor(None,func)
-
-# TODO pooling ahead!
-#def try_asyncio_pool(func):
 
 def build_address(arg1,arg2=None,folder='../tmp/'):
   port = tryx(lambda:int(arg1),False)
@@ -317,11 +326,9 @@ def build_address(arg1,arg2=None,folder='../tmp/'):
     address = (host,port)
   return address
 
-# run cmd and get return
-#systemx = lambda s: os.popen(s).read()
 # e.g. code,s=tryx(lambda:systemx('shit 2>&1')) or [-1,'']
-def systemx(cmd):
-  p=os.popen(cmd)
-  s=p.read()
-  return p.close() or 0,s
-
+def systemx(cmd,w=None):
+  import subprocess
+  with subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as p:
+      if w: return p.communicate(input=w.encode() if type(w) is str else w)[0]
+      return p.stdout.read()

@@ -1,18 +1,16 @@
 #-*- coding: utf-8 -*-
 
-# py-coding-simplifer by Wanjo 20221009
+# py-coding-simplifer by Wanjo 20221010
 
-from __future__ import print_function # for py2: no more print ... allow but print()
-
-# alias of the print
+from __future__ import print_function # for py2 print()
 _print=print
 
-from time import time as now, mktime, sleep, ctime
+from time import time as now, mktime, sleep
 
 load_time = now()
 
-#exec('def tryx(l,e=print):\n try:return l()\n except Exception as ex:return ex if True==e else e(ex) if e else None')
 # core of mypy
+#exec('def tryx(l,e=print):\n try:return l()\n except Exception as ex:return ex if True==e else e(ex) if e else None')
 def tryx(l,e=print):
     try: return l()
     except Exception as ex: return ex if True==e else e(ex) if e else None
@@ -45,6 +43,11 @@ def file_rename(fnold,fnnew=None,try_delete_after=False):
 
 evalx = lambda s,g=globals():eval(s,g)
 
+flag_py2 = sys.version_info.major==2
+sys_import = __import__
+sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
+refresh = lambda n:sys_reload(sys_import(n))
+
 class probe:
     def __init__(self,ev): self._ev=ev
     def __getattr__(self,k): return tryx(lambda:self._ev(k))
@@ -61,7 +64,6 @@ class probex:
 # from megadata.mypy import mypy
 mypy = probex(evalx)
 
-flag_py2 = sys.version_info.major==2
 if not flag_py2:
     # https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading/22253656#22253656
     def patch_connection_pool(**constructor_kwargs):
@@ -78,10 +80,6 @@ if not flag_py2:
         poolmanager.pool_classes_by_scheme['https'] = MyHTTPSConnectionPool
     #tryx(lambda:patch_connection_pool(maxsize=16))
 
-sys_import = __import__
-sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
-refresh = lambda n:sys_reload(sys_import(n))
-
 def delx(o,k):
     tryx(lambda:o.__delitem__(k),False)
     tryx(lambda:o.__delattr__(k),False)
@@ -93,9 +91,7 @@ class MyJsonEncoder(json.JSONEncoder):
 s2o = lambda s:tryx(lambda:json.loads(s),False)
 o2s = lambda o,indent=None:tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder))
 
-def o2b(o):
-  from pickle import dumps
-  return tryx(lambda:dumps(o),True)
+from pickle import dumps as o2b, loads as b2o
 
 def get_urlopen():
   if flag_py2: from urllib2 import urlopen
@@ -128,7 +124,7 @@ def wsc(u,data,lines=1):
 
 # NOTES:
 ## UP {bytes: ..., None: None, str: encode('utf-8'), else:o2s(...).encode('utf-8')}
-## DN {bytes: pickle.loads, else:...} 
+## DN {bytes: b2o, else:...} 
 def ipc(u,data,authkey=None,out=None):
   s=data.encode('utf-8') if isinstance(data,str) else data if isinstance(data,bytes) else o2s(data).encode('utf-8') if data is not None else None
   #print('dbg.ipc=>',type(data),type(s))
@@ -159,8 +155,7 @@ def ipc(u,data,authkey=None,out=None):
   if close: tryx(conn.close)
   #print('dbg.ipc<=',type(rt))
   if isinstance(rt, bytes):
-    import pickle
-    rt_loads = pickle.loads(rt)
+    rt_loads = b2o(rt)
     #print('dbg.ipc',type(rt_loads),len(rt))
     return rt_loads
   return rt
@@ -211,7 +206,6 @@ almost = lambda v1,v2,epsilon=0.0001:abs(v1-v2)<epsilon
 def time_maker(days=0,date=None,outfmt=None,infmt='%Y-%m-%d',
         months=0):
     from datetime import datetime,timedelta
-    from time import mktime
     if date is None: _dt = datetime.now()
     else: _dt = datetime.fromtimestamp(int(date))\
         if infmt=='0' or not infmt\
@@ -326,9 +320,7 @@ def build_address(arg1,arg2=None,folder='../tmp/'):
     address = (host,port)
   return address
 
-# e.g. code,s=tryx(lambda:systemx('shit 2>&1')) or [-1,'']
 def systemx(cmd,w=None):
   import subprocess
   with subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as p:
-      if w: return p.communicate(input=w.encode() if type(w) is str else w)[0]
-      return p.stdout.read()
+      return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read()

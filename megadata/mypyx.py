@@ -1,4 +1,7 @@
+# mypyx - more gist
+
 from megadata.mypy import *
+
 def sizeof(v):
     vv = v # todo fn/function
     size_code = None

@@ -109,7 +109,7 @@ def tiny_email(user, mypass, sender, receiver, Subject, html, smtp_host='smtp.qq
 
 class dba:
     _ = {'_':now()}
-    def __init__(self, *args,**kwargs):
+    def __init__(self,*args,**kwargs):
         self.hash = _hash = hash(self)
         dba._[_hash]={}
         try:
@@ -123,6 +123,13 @@ class dba:
             dbstr_file = kwargs.get('dbstr_file')
             if dbstr_file: dbstr = read(dbstr_file).strip()
 
+            if not dbstr:
+                if len(args)>0:
+                    args0 = args[0]
+                    if '://' in args0: dbstr = args0
+                    else:
+                        dbstr_file = args0
+                        dbstr = read(dbstr_file).strip()
             if dbstr:
                 dbstr = dbstr.format(**kwargs)
                 parsed = urlparse(dbstr)

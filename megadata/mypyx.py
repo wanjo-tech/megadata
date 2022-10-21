@@ -102,3 +102,53 @@ def tiny_email(user, mypass, sender, receiver, Subject, html, smtp_host='smtp.qq
     server.sendmail(sender, receiver_a, msg.as_string())
     server.quit()
 
+###################################### dba wrapper (using sqlalchemy)
+#'{scheme}://{user}:{password}@{host}:{port}/{db}?charset={charset}#{fragment}'
+#'{scheme}://{netloc}@{host}:{port}/{path}?{query}#{fragment}'
+#e.g.'mysql://root:123456@127.0.0.1:3306/?charset=utf8mb4'
+
+class dba:
+    _ = {'_':now()}
+    def __init__(self, *args,**kwargs):
+        self.hash = _hash = hash(self)
+        dba._[_hash]={}
+        try:
+            from urllib.parse import quote_plus,urlparse
+
+            password = kwargs.get('password')
+            if password: kwargs['password'] = quote_plus(password)
+
+            dbstr = kwargs.get('dbstr')
+
+            dbstr_file = kwargs.get('dbstr_file')
+            if dbstr_file: dbstr = read(dbstr_file).strip()
+
+            if dbstr:
+                dbstr = dbstr.format(**kwargs)
+                parsed = urlparse(dbstr)
+                scheme = parsed.scheme
+            else:
+                scheme = kwargs.get('scheme')
+            self.scheme = scheme
+            debug = kwargs.get('debug')
+            if debug:
+                print('kwargs=',kwargs)
+                print('dbstr=',dbstr)
+                dba._[_hash]['dbstr']=dbstr
+            from sqlalchemy import create_engine
+            self.engine = create_engine(dbstr)
+        except Exception as ex:
+            print('ex=',ex)
+
+    def __del__(self): dba._.pop(self.hash, None)
+
+    def df(self,sql):
+        from pandas import read_sql
+        return read_sql(sql,self.engine)
+
+    def yielder(self,sql):
+        with self.engine.connect() as conn:
+            conn = conn.execution_options(stream_results=True)
+            for row in conn.execute(sql): yield row
+
+

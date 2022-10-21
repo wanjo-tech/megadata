@@ -2,3 +2,4 @@
 *.egg-info/
 /megadata/__pycache__/*.pyc
 /megadata/*.swp
+/*.tmp

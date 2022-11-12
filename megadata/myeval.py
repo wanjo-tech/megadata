@@ -1,11 +1,18 @@
 # eval tool by wanjo 20220925
 
-from mypy import tryx,s2o,sys_import,loads_func,now
+from mypy import tryx,s2o,sys_import,loads_func,now,use
 
 load_time = now()
 
+# TODO
+# use(c,'api')(*args,**kwargs)
+# useapi = lambda c,m,*args,**kwargs: getattr(use(c,'api')(*args,**kwargs),m)
+# loadapi(c,m,request=request)(*args,**kwargs)
+
+# old way, deprecated, will remove soon
 def fwd(c,m,param_a): return tryx(lambda:getattr(sys_import(c).api(param_a),m)(*param_a),lambda ex:{'errmsg':str(ex)})
 
+# working version but not yet support server objects
 def fwdapi(c,m,*args,**kwargs): return tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
 
 def myeval(s,g={},l={},debug=False):
@@ -89,7 +96,7 @@ def myeval(s,g={},l={},debug=False):
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
         else:
-            # TODO remove fwd() and using fwdapi instead?
+            # TODO remove fwd() and using fwdapi instead...
             # TMP fwd to api{c}.m(call_param)
             # TODO should using *args,**kwargs
             rt = fwd(f'api{a[0]}',a[1],call_param)

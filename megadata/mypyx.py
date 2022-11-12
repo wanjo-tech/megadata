@@ -159,3 +159,22 @@ class dba:
             for row in conn.execute(sql): yield row
 
 
+def get_cmdline_args_kwargs():
+  #import argparse
+  #parser = argparse.ArgumentParser()
+  from argparse import ArgumentParser
+  parser = ArgumentParser()
+
+  # first round (TODO, simplify logic later...)
+  parsed, unknown = parser.parse_known_args() # this is an 'internal' method
+  rt_args = []
+  for arg in unknown:
+      if arg.startswith(("-", "--")):
+          parser.add_argument(arg.split('=')[0], type=str)
+      else:
+          rt_args.append(arg)
+  # again to get the parsed
+  parsed, unknown = parser.parse_known_args()
+  rt_kwargs = parsed.__dict__
+  return rt_args, rt_kwargs
+

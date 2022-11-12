@@ -324,3 +324,9 @@ def systemx(cmd,w=None):
   import subprocess
   with subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as p:
       return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read()
+
+def use(mdlname,clsname=None):
+  rt = sys_import(mdlname)
+  if clsname: return tryx(lambda:getattr(rt,clsname))
+  return rt
+

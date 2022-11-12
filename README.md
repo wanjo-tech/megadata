@@ -8,5 +8,7 @@ python -m pip install -U megadata
 
 # TODO
 
-## client shell for different databases ;)
-* python -m megadata [clt] *args **kwargs
+## client shell for different databases/server ;)
+* python -m megadata *args **kwargs
+
+## TODO scheme myipc:// ?

@@ -6,6 +6,7 @@ def on_quit(*a):
 hook_quit(on_quit)
 
 def clt_ipc(argv):
+  print('clt_ipc',argv)
   argc = len(argv)
   address = build_address(argv[1], argv[2] if argc>2 else None)
   print('address=',address)

@@ -21,16 +21,26 @@ if __package__ == "":
 
 #print(sys.path)
 
+# tmp, will improve later
 def main(argv):
-  from megadata.clt_ipc import clt_ipc
-  #print(argv)
-  clt_ipc(argv)
+  typ = argv[0]
+  if typ=='ipc':
+    from clt_ipc import clt_ipc
+    clt_ipc(argv)
+  elif typ=='web':
+    from clt_web import clt_web
+    clt_web(argv)
+  else:
+    print(f'not yet support {typ}')
 
 if __name__ == "__main__":
   from megadata.mypy import argv
 
-  # TODO python -m megadata clt ipcft .
+  # python -m megadata clt ipcft .
   main(argv[1:])
+
+#else:
+#  print(__name__,argv)
 
 #  class argchain:
 #    def __init__(self,*args,**kwargs):

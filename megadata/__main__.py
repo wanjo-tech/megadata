@@ -25,10 +25,10 @@ if __package__ == "":
 def main(argv):
   typ = argv[0]
   if typ=='ipc':
-    from clt_ipc import clt_ipc
+    from megadata.clt_ipc import clt_ipc
     clt_ipc(argv)
   elif typ=='web':
-    from clt_web import clt_web
+    from megadata.clt_web import clt_web
     clt_web(argv)
   else:
     print(f'not yet support {typ}')

@@ -1,4 +1,4 @@
-from mypy import tryx, now, parallel, hook_quit, argv, argc, sys, os,wc
+from megadata.mypy import tryx, now, parallel, hook_quit, argv, argc, sys, os,wc
 
 def clt_web(argv):
   print('clt_web',argv)

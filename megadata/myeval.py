@@ -1,6 +1,6 @@
 # eval tool by wanjo 20220925
 
-from mypy import tryx,s2o,sys_import,loads_func,now,use
+from megadata.mypy import tryx,s2o,sys_import,loads_func,now,use,sys
 
 load_time = now()
 
@@ -125,7 +125,6 @@ if __name__ == '__main__':
   /api('Adm','ping')
   (type(type))
   """
-  from mypy import sys,now
   for line in sys.stdin:
     r = tryx(lambda:myeval(line,{"__builtins__":{
     'type':type,

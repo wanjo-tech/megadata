@@ -11,10 +11,11 @@ def clt_ipc(argv):
   address = build_address(argv[1], argv[2] if argc>2 else None)
   print('address=',address)
 
-  out={}
+  # out={} # reusing has bug yet, todo
   #server= lambda v: ipc(address, v, out=out)
   def server(v):
-    return ipc(address,v,out=out)
+    #return ipc(address,v,out=out)
+    return ipc(address,v)
 
   import pickle
   for line in sys.stdin:

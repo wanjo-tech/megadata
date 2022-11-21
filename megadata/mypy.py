@@ -125,10 +125,10 @@ def wsc(u,data,lines=1):
 # NOTES:
 ## UP {bytes: ..., None: None, str: encode('utf-8'), else:o2s(...).encode('utf-8')}
 ## DN {bytes: b2o, else:...} 
-def ipc(u,data,authkey=None,out=None):
+def ipc(u,data,authkey=None,out=None,timeout=7):
   s=data.encode('utf-8') if isinstance(data,str) else data if isinstance(data,bytes) else o2s(data).encode('utf-8') if data is not None else None
   #print('dbg.ipc=>',type(data),type(s))
-  from multiprocessing.connection import Client
+  from multiprocessing.connection import Client,wait
   close = False
   if out is None:
     conn = Client(u)
@@ -144,6 +144,7 @@ def ipc(u,data,authkey=None,out=None):
     out['conn'] = conn
   try:
     conn.send(s)
+    if timeout: wait([conn],timeout)
     rt = conn.recv()
   except Exception as ex:
     if out is not None:
@@ -320,10 +321,19 @@ def build_address(arg1,arg2=None,folder='../tmp/'):
     address = (host,port)
   return address
 
-def systemx(cmd,w=None):
-  import subprocess
-  with subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as p:
-      return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read()
+import subprocess
+#def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE,creationflags=0x08000000):
+#  _stdout = sys.stdout if stdout is None else stdout
+#  with subprocess.Popen(cmd, stdout=_stdout, stdin=subprocess.PIPE,creationflags=creationflags) as p:
+#      return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read() if p.stdout is not None and stdout is not None else None
+#
+CREATE_NO_WINDOW = 0x08000000
+def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE,creationflags=0):
+  _stdout = sys.stdout if stdout is None else stdout
+  #if stdout is None: creationflags = 0
+  with subprocess.Popen(cmd, stdout=_stdout, stdin=subprocess.PIPE,creationflags=creationflags) as p:
+      return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read() if p.stdout is not None and stdout is not None else None
+
 
 def use(mdlname,clsname=None):
   rt = sys_import(mdlname)

@@ -8,13 +8,13 @@ def clt_web(argv):
 
   hook_quit(on_quit)
 
-  port = tryx(lambda:int(argv[1]),False) or '80'
-
-  host = tryx(lambda:argv[2],False) or '127.0.0.1'
-  protocol = tryx(lambda:int(argv[3]),False) or 'http'
-
-  address = f'{protocol}://{host}:{port}'
-
+  if '://' in argv[1]:
+    address = argv[1]
+  else:
+    port = tryx(lambda:int(argv[1]),False) or '80'
+    host = tryx(lambda:argv[2],False) or '127.0.0.1'
+    protocol = tryx(lambda:int(argv[3]),False) or 'http'
+    address = f'{protocol}://{host}:{port}'
   print(address)
 
   def send_once(v):

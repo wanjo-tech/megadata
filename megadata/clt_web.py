@@ -13,7 +13,7 @@ def clt_web(argv):
   else:
     port = tryx(lambda:int(argv[1]),False) or '80'
     host = tryx(lambda:argv[2],False) or '127.0.0.1'
-    protocol = tryx(lambda:int(argv[3]),False) or 'http'
+    protocol = tryx(lambda:str(argv[3]),False) or 'http'
     address = f'{protocol}://{host}:{port}'
   print(address)
 

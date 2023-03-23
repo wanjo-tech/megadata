@@ -1,12 +1,14 @@
 #-*- coding: utf-8 -*-
 
-# py-coding-simplifer by Wanjo 20221010
+# py-coding-simplifer by Wanjo 20230323
+# 20230323: dropped _print, and fix try_asyncio
 
-from __future__ import print_function # for py2 print()
-_print=print
+#from __future__ import print_function # for py2 print()
+#_print=print
 
 from time import time as now, mktime, sleep
 
+# for audit
 load_time = now()
 
 # core of mypy
@@ -302,12 +304,14 @@ Thread = mypy.threading.Thread
 #try_async=lambda func:Thread(target=func).start()
 def try_async(func): Thread(target=func).start()
 
-#import asyncio
-#new_event_loop = asyncio.new_event_loop
+import asyncio
 from asyncio import new_event_loop
-def try_asyncio(func):
-  new_event_loop().run_in_executor(None,func)
-
+#def try_asyncio(func): return new_event_loop().run_in_executor(None,func)
+#try_asyncio = lambda func,*args:new_event_loop().run_in_executor(None,func,*args)
+try_asyncio = lambda func:new_event_loop().run_in_executor(None,func)
+#async def try_asyncio(func): return await new_event_loop().run_in_executor(None,func)
+  
+# for ipc
 def build_address(arg1,arg2=None,folder='../tmp/'):
   port = tryx(lambda:int(arg1),False)
   if port is None:
@@ -334,6 +338,13 @@ def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subpr
   with subprocess.Popen(cmd, stdout=_stdout, stdin=subprocess.PIPE,creationflags=creationflags) as p:
       return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read() if p.stdout is not None and stdout is not None else None
 
+# audit = print
+# .stdout, .stderr, .returncode
+def system(cmd_or_a,stdout_only=True,audit=None):
+  result = subprocess.run(cmd_or_a, shell=True, capture_output=True, text=True)
+  rt = result.stdout if stdout_only else result
+  if audit: audit(rt)
+  return rt
 
 def use(mdlname,clsname=None):
   rt = sys_import(mdlname)

@@ -106,8 +106,6 @@ def myeval(s,g={},l={},debug=False):
 
     if debug:print(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
 
-    if is_awaitable(rt): rt = await rt
-
     if call_style==1: # list mode
         if call_id is None:
             return [rt] # 
@@ -207,6 +205,8 @@ async def myevalasync(s,g={},l={},debug=False):
         rt = {'errmsg':'TODO'}
 
     if debug:print(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
+
+    if is_awaitable(rt): rt = await rt
 
     if call_style==1: # list mode
         if call_id is None:

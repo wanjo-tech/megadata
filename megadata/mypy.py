@@ -305,7 +305,14 @@ Thread = mypy.threading.Thread
 def try_async(func): Thread(target=func).start()
 
 import asyncio
-from asyncio import new_event_loop
+
+from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop
+is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
+async def try_await(o):
+  if is_awaitable(o):
+    return await o
+  return o
+
 #def try_asyncio(func): return new_event_loop().run_in_executor(None,func)
 #try_asyncio = lambda func,*args:new_event_loop().run_in_executor(None,func,*args)
 try_asyncio = lambda func:new_event_loop().run_in_executor(None,func)

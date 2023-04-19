@@ -1,17 +1,11 @@
 #-*- coding: utf-8 -*-
 
-# py-coding-simplifer by Wanjo 20230323
-# 20230323: dropped _print, and fix try_asyncio
-
-#from __future__ import print_function # for py2 print()
-#_print=print
+# py-coding-simplifer by Wanjo
 
 from time import time as now, mktime, sleep
 
-# for audit
 load_time = now()
 
-# core of mypy
 #exec('def tryx(l,e=print):\n try:return l()\n except Exception as ex:return ex if True==e else e(ex) if e else None')
 def tryx(l,e=print):
     try: return l()
@@ -36,6 +30,7 @@ touch_dir = lambda fn:os.makedirs(fn,exist_ok=True)
 file_exists = os.path.exists
 get_mtime = lambda f:os.path.getmtime(f)
 
+# rename or delete
 def file_rename(fnold,fnnew=None,try_delete_after=False):
     if try_delete_after:
         fnnew = f'{fnnew}.delete.{now()}'
@@ -43,7 +38,7 @@ def file_rename(fnold,fnnew=None,try_delete_after=False):
     if try_delete_after:
         tryx(lambda:os.remove(fnnew))
 
-evalx = lambda s,g=globals():eval(s,g)
+evalx = lambda s,g=globals(),l=locals():eval(s,g,l)
 
 flag_py2 = sys.version_info.major==2
 sys_import = __import__
@@ -66,7 +61,7 @@ class probex:
 # from megadata.mypy import mypy
 mypy = probex(evalx)
 
-if not flag_py2:
+if not flag_py2: # patch for some urlopen case
     # https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading/22253656#22253656
     def patch_connection_pool(**constructor_kwargs):
         from urllib3 import connectionpool, poolmanager
@@ -100,11 +95,11 @@ def get_urlopen():
   else: from urllib.request import urlopen
   return urlopen
 
-# NOTES: one-off simple web call, not for heavy usage!!
+# NOTES: one-off simple web call, not for heavy usage!! using aiohttp instead!
+
 wc=lambda u=None, data=None, m='POST', timeout=10:get_urlopen()(url=u,data=data.encode('utf-8') if isinstance(data,str) else o2s(data).encode('utf-8') if data else None,timeout=timeout).read().decode()
 
-# NOTES: one-off ws call, not for heavy usage!!!
-# TODO: need to fix for non-blocking...
+# NOTES: one-off ws call, not for heavy usage!!! has problem of IO-blocking
 def wsc(u,data,lines=1):
   s=data.encode('utf-8') if isinstance(data,str) else o2s(data).encode('utf-8') if data else None
 
@@ -256,6 +251,23 @@ def parallel(func, a, pool_size=None,chunksize=None,mode='default',map_async=Fal
   else:
     return Pool(pool_size).map(func, a, chunksize=chunksize)
 
+# asyncio version of parallel()
+async def parallelx(async_func, a, pool_size=None):
+    from concurrent.futures import ThreadPoolExecutor
+    async def limited_concurrent_tasks(semaphore, async_func, arg):
+        async with semaphore:
+            return await async_func(arg)
+    if pool_size is None:
+      from os import cpu_count
+      pool_size =  cpu_count()
+    semaphore = Semaphore(pool_size)
+    with ThreadPoolExecutor() as pool:
+        loop = get_event_loop()
+        #tasks = [loop.create_task(async_func(arg)) for arg in a]
+        tasks = [loop.create_task(limited_concurrent_tasks(semaphore,async_func,arg)) for arg in a]
+        results = await gather(*tasks)
+        return results
+
 def mygc():
     import gc
     import sys
@@ -297,28 +309,25 @@ def yielder_loop(func,wrap=tryx,do_yield=True):
     rt = yield from yielder(func, wrap, do_yield)
     if do_yield and rt is not None: yield rt
 
-#import threading
-#Thread = threading.Thread
 Thread = mypy.threading.Thread
-#try_async=lambda func:tryx(lambda:threading.Thread(target=func).start())
-#try_async=lambda func:Thread(target=func).start()
 def try_async(func): Thread(target=func).start()
 
 import asyncio
 
-from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop
+from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,Semaphore,gather
 is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
 async def try_await(o):
   if is_awaitable(o):
     return await o
   return o
 
-#def try_asyncio(func): return new_event_loop().run_in_executor(None,func)
-#try_asyncio = lambda func,*args:new_event_loop().run_in_executor(None,func,*args)
 try_asyncio = lambda func:new_event_loop().run_in_executor(None,func)
-#async def try_asyncio(func): return await new_event_loop().run_in_executor(None,func)
+#TODO
+#def try_asyncio(fn):
+#    import concurrent.futures
+#    return (asyncio.get_running_loop() or asyncio.new_event_loop()).run_in_executor(concurrent.futures.ThreadPoolExecutor(), fn)
   
-# for ipc
+# for ipc()
 def build_address(arg1,arg2=None,folder='../tmp/'):
   port = tryx(lambda:int(arg1),False)
   if port is None:
@@ -337,7 +346,6 @@ import subprocess
 #  _stdout = sys.stdout if stdout is None else stdout
 #  with subprocess.Popen(cmd, stdout=_stdout, stdin=subprocess.PIPE,creationflags=creationflags) as p:
 #      return p.communicate(input=w.encode() if type(w) is str else w)[0] if w else p.stdout.read() if p.stdout is not None and stdout is not None else None
-#
 CREATE_NO_WINDOW = 0x08000000
 def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE,creationflags=0):
   _stdout = sys.stdout if stdout is None else stdout

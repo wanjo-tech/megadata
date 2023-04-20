@@ -254,7 +254,6 @@ def parallel(func, a, pool_size=None,chunksize=None,mode='default',map_async=Fal
 from asyncio import Semaphore,gather,wait_for
 # asyncio version of parallel()
 async def parallelx(async_func, a, pool_size=None, timeout=30):
-    from concurrent.futures import ThreadPoolExecutor
     async def limited_concurrent_tasks(semaphore, async_func, arg):
         async with semaphore:
             #return await async_func(arg)
@@ -263,12 +262,12 @@ async def parallelx(async_func, a, pool_size=None, timeout=30):
       from os import cpu_count
       pool_size =  cpu_count()
     semaphore = Semaphore(pool_size)
+    from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor() as pool:
         loop = get_event_loop()
         #tasks = [loop.create_task(async_func(arg)) for arg in a]
         tasks = [loop.create_task(limited_concurrent_tasks(semaphore,async_func,arg)) for arg in a]
-        results = await gather(*tasks)
-        return results
+        return await gather(*tasks)
 
 def mygc():
     import gc

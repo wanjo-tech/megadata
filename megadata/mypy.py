@@ -251,12 +251,14 @@ def parallel(func, a, pool_size=None,chunksize=None,mode='default',map_async=Fal
   else:
     return Pool(pool_size).map(func, a, chunksize=chunksize)
 
+from asyncio import Semaphore,gather,wait_for
 # asyncio version of parallel()
-async def parallelx(async_func, a, pool_size=None):
+async def parallelx(async_func, a, pool_size=None, timeout=30):
     from concurrent.futures import ThreadPoolExecutor
     async def limited_concurrent_tasks(semaphore, async_func, arg):
         async with semaphore:
-            return await async_func(arg)
+            #return await async_func(arg)
+            return await wait_for(async_func(arg),timeout=timeout)
     if pool_size is None:
       from os import cpu_count
       pool_size =  cpu_count()

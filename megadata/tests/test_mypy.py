@@ -1,7 +1,16 @@
-import sys
-sys.path.append('..')
+"""
+pytest
+"""
+import sys,os
+
+#print("__package__",__package__)
+#print("__file__",__file__)
+
+path = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, path)
 
 from mypy import try_asyncio
+##################################################
 
 import asyncio
 from asyncio import get_event_loop, run as asyncio_run,new_event_loop

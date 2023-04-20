@@ -10,7 +10,7 @@ from megadata.mypy import *
 white_list = tryx(lambda:load('../tmp/white_list.json'))
 black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 
-from myeval import myeval,fwdapi
+from megadata.myeval import myeval,fwdapi
 #my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
 
 get_builtins = lambda:{
@@ -81,7 +81,7 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
     while True:
       conn = tryx(server.accept)
       if conn is None: print('.')
-      else: try_asyncio(lambda:handle_ipc((conn,server.last_accepted)))
+      else: try_asyncio(lambda:handle_ipc((conn,server.last_accepted)),new=True)
 
   else:# pool mode
 

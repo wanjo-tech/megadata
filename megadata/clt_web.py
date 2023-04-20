@@ -1,31 +1,16 @@
-from megadata.mypy import tryx, now, parallel, hook_quit, argv, argc, sys, os,wc
-
-def clt_web(argv):
-  print('clt_web',argv)
-  def on_quit(*a):
-    print('quit',a)
-    os._exit(0)
-
-  hook_quit(on_quit)
-
-  if '://' in argv[1]:
+from megadata.mypy import tryx,sys,wc
+def clt_web(argv,timeout=20):
+  if len(argv)>1 and '://' in argv[1]:
     address = argv[1]
   else:
     port = tryx(lambda:int(argv[1]),False) or '80'
     host = tryx(lambda:argv[2],False) or '127.0.0.1'
     protocol = tryx(lambda:str(argv[3]),False) or 'http'
     address = f'{protocol}://{host}:{port}'
-  print(address)
-
-  def send_once(v):
-    rt = wc(address, v, timeout=20)
-    return rt
-
-  def yield_arg():
-    for v in range(1,9999):
-      yield v
-
+  print(f'clt_web{argv} to {address}')
+  send_once = lambda v:wc(address, v, timeout=timeout)
   for line in sys.stdin: print(send_once(line))
 
 if __name__ == '__main__':
+  from megadata.mypy import argv
   clt_web(argv)

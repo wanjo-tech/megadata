@@ -19,10 +19,8 @@ if __package__ == "":
     path = os.path.dirname(os.path.dirname(__file__))
     sys.path.insert(0, path)
 
-#print(sys.path)
-
-# tmp, will improve later
 def main(argv):
+  #print(sys.path)
   typ = argv[0]
   if typ=='ipc':
     from megadata.clt_ipc import clt_ipc
@@ -31,7 +29,7 @@ def main(argv):
     from megadata.clt_web import clt_web
     clt_web(argv)
   else:
-    print(f'not yet support {typ}')
+    print(f'TODO "{typ}"')
 
 if __name__ == "__main__":
   from megadata.mypy import argv

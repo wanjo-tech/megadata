@@ -5,7 +5,7 @@
 # TODO merge logic with svr_ipcx.py => svr_ipc_bin.py [ipc/ipcx]
 
 #from Application import tryx,argv,argc,hook_quit,sys_import,os,o2s,try_async,build_address,yielder_loop,now,yielder,sys,load,try_asyncio
-from Application import *
+from megadata.mypy import *
 
 white_list = tryx(lambda:load('../tmp/white_list.json'))
 black_list = tryx(lambda:load('../tmp/black_list.json')) or []

@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 if __name__ == '__main__':
-  from Application import *
+  from megadata.mypy import *
 
   from svr_ipc_bin import my_main_ipc,on_quit,start_stdin
   hook_quit(on_quit)

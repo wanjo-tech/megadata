@@ -1,12 +1,12 @@
 [project]
 name = "megadata"
-version = "0.0.20"
+version = "0.0.22"
 authors = [
   { name="Wanjo Chan", email="wanjochan@gmail.com" },
 ]
 description = "tools from/for megadata"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -15,4 +15,4 @@ classifiers = [
 
 [project.urls]
 "Homepage" = "https://github.com/wanjo-tech/megadata"
-"Bug Tracker" = "https://github.com/wanjo-tech/megadata/issues"
+

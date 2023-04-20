@@ -3,3 +3,5 @@
 /megadata/__pycache__/*.pyc
 /megadata/*.swp
 /*.tmp
+*.swp
+/megadata/tests/__pycache__

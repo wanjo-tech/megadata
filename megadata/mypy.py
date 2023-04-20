@@ -321,11 +321,7 @@ async def try_await(o):
     return await o
   return o
 
-try_asyncio = lambda func:new_event_loop().run_in_executor(None,func)
-#TODO
-#def try_asyncio(fn):
-#    import concurrent.futures
-#    return (asyncio.get_running_loop() or asyncio.new_event_loop()).run_in_executor(concurrent.futures.ThreadPoolExecutor(), fn)
+try_asyncio = lambda func,new=False:(new_event_loop if new else get_event_loop)().run_in_executor(None,func)
   
 # for ipc()
 def build_address(arg1,arg2=None,folder='../tmp/'):

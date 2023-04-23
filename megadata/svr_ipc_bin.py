@@ -22,17 +22,23 @@ get_builtins = lambda:{
 
 import pickle
 def handle_ipc(param):
-    loop = new_event_loop()
+    #print('param=',param)
     conn,client = param
+    # client could be None when it came from local...
     assert client is None or len(client)==0 or (white_list is None) or (white_list and client[0] in white_list), f'banned {client}'
 
+    loop = new_event_loop()
     # TODO if closed
     while True:
-      #data = tryx(conn.recv,print)
-      data = tryx(conn.recv)
+      #print('recv[')
+      #EOFError
+      data = tryx(conn.recv,lambda ex:print(ex,client))
+      #print('recv]')
       if data is None:
         #print('break')
+        #print('close[')
         tryx(conn.close)
+        #print('close]')
         break
 
       #print('TMP DEBUG handle_ipc',data)
@@ -85,7 +91,9 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
     while True:
       conn = tryx(server.accept)
       if conn is None: print('.')
-      else: try_asyncio(lambda:handle_ipc((conn,server.last_accepted)),new=True)
+      else:
+        #print('server.last_accepted',server.last_accepted)
+        try_asyncio(lambda:handle_ipc((conn,server.last_accepted)),new=True)
 
   else:# pool mode
 

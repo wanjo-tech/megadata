@@ -41,8 +41,9 @@ def file_rename(fnold,fnnew=None,try_delete_after=False):
 evalx = lambda s,g=globals(),l=locals():eval(s,g,l)
 
 flag_py2 = sys.version_info.major==2
-sys_import = __import__
-sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
+import importlib
+sys_import = importlib.import_module
+sys_reload = importlib.reload
 refresh = lambda n:sys_reload(sys_import(n))
 
 class probe:
@@ -80,7 +81,8 @@ def use(mdlname,clsname=None,reload=False):
       if rt is None: break # safety
   return rt
 
-if not flag_py2: # patch for some urlopen case
+#if not flag_py2: # patch for some urlopen case
+if True:
     # https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading/22253656#22253656
     def patch_connection_pool(**constructor_kwargs):
         from urllib3 import connectionpool, poolmanager
@@ -109,9 +111,10 @@ o2s = lambda o,indent=None:tryx(lambda:json.dumps(o, indent=indent, ensure_ascii
 
 from pickle import dumps as o2b, loads as b2o
 
+from urllib.request import urlopen
 def get_urlopen():
-  if flag_py2: from urllib2 import urlopen
-  else: from urllib.request import urlopen
+  #if flag_py2: from urllib2 import urlopen
+  #else: from urllib.request import urlopen
   return urlopen
 
 # NOTES: one-off simple web call, not for heavy usage!! using aiohttp instead!
@@ -376,3 +379,7 @@ def system(cmd_or_a,stdout_only=True,audit=None):
   if audit: audit(rt)
   return rt
 
+#################### DELETED
+#sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
+#sys_import = __import__
+#flag_py2 = sys.version_info.major==2

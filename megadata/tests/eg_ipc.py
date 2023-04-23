@@ -4,7 +4,8 @@ sys.path.append('..')
 from mypy import *
 
 port = argv[1]
-host = argv[2] if argc>2 else '127.0.0.1'
+#host = argv[2] if argc>2 else '127.0.0.1'
+host = argv[2] if argc>2 else None
 
 #ipc_entry = (host,port)
 

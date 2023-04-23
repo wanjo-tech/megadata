@@ -10,6 +10,13 @@ class api(objx):
         dff_time = now_time - int(float(ping))
       return now_time,round(load_time),dff_time
 
+  async def pingx(self, ping=None):
+      dff_time = None
+      now_time = int(now())
+      if ping:
+        dff_time = now_time - int(float(ping))
+      return now_time,round(load_time),dff_time
+
   def reload(self, mdl=__name__):
 
     if type(self.param) is dict:

@@ -64,18 +64,20 @@ mypy = probex(evalx)
 import marshal,types
 
 # e.g. use('random.random')()
-def use(mdlname,clsname=None):
+def use(mdlname,clsname=None,reload=False):
   rt = None
   if type(mdlname) is str:
-    for v in mdlname.split('.'):
-      if rt is None:
-        rt = sys_import(v)
-      else:
-        rt = tryx(lambda:getattr(rt,v))
-      if rt is None: break # safety
+    if reload:
+      rt = refresh(mdlname)
+    else:
+      rt = sys_import(mdlname)
   else:
     rt = mdlname
-  if clsname: return tryx(lambda:getattr(rt,clsname))
+  if type(clsname) is str:
+    #return tryx(lambda:getattr(rt,clsname))
+    for v in clsname.split('.'):
+      rt = tryx(lambda:getattr(rt,v))
+      if rt is None: break # safety
   return rt
 
 if not flag_py2: # patch for some urlopen case

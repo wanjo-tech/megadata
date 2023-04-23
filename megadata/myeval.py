@@ -1,6 +1,6 @@
 # eval tool by wanjo 20220925
 
-from megadata.mypy import tryx,s2o,sys_import,loads_func,now,use,sys,is_awaitable
+from .mypy import tryx,s2o,sys_import,loads_func,now,use,sys,is_awaitable
 
 load_time = now()
 
@@ -13,7 +13,10 @@ load_time = now()
 def fwd(c,m,param_a): return tryx(lambda:getattr(sys_import(c).api(param_a),m)(*param_a),lambda ex:{'errmsg':str(ex)})
 
 # working version but not yet support server objects
-def fwdapi(c,m,*args,**kwargs): return tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
+def fwdapi(c,m,*args,**kwargs):
+  rt = tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
+  #print('DEBUG fwdapi',[c,m,args],'=>',rt)
+  return rt
 
 # deprecated !!!!
 def myeval(s,g={},l={},debug=False):
@@ -162,7 +165,10 @@ async def myevalasync(s,g={},l={},debug=False):
         s=s.replace('__builtins__','') # safe-guard ;)
         if s[0]=='/': s = s[1:]
         #return str(tryx(lambda:eval(s,g,l),True)) # DEBUG: testing no str...
-        return tryx(lambda:eval(s,g,l),True)
+        rt = tryx(lambda:eval(s,g,l),True)
+        #print('TMP DEBUG type(rt)',type(rt),rt)
+        if is_awaitable(rt): rt = await rt
+        return rt
 
     # dict-come-dict-go, old and please try not to use...
     elif s[0]=='{':

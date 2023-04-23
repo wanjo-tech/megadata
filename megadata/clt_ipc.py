@@ -1,4 +1,4 @@
-from megadata.mypy import *
+from .mypy import *
 
 def on_quit(*a):
   print('on_quit',*a)

@@ -1,4 +1,4 @@
-from megadata.mypy import tryx,sys,wc
+from .mypy import tryx,sys,wc
 def clt_web(argv,timeout=20):
   if len(argv)>1 and '://' in argv[1]:
     address = argv[1]
@@ -12,5 +12,5 @@ def clt_web(argv,timeout=20):
   for line in sys.stdin: print(send_once(line))
 
 if __name__ == '__main__':
-  from megadata.mypy import argv
+  from .mypy import argv
   clt_web(argv)

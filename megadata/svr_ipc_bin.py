@@ -4,13 +4,12 @@
 
 # TODO merge logic with svr_ipcx.py => svr_ipc_bin.py [ipc/ipcx]
 
-#from Application import tryx,argv,argc,hook_quit,sys_import,os,o2s,try_async,build_address,yielder_loop,now,yielder,sys,load,try_asyncio
-from megadata.mypy import *
+from .mypy import *
+from .myeval import myeval,myevalasync,fwdapi
 
 white_list = tryx(lambda:load('../tmp/white_list.json'))
 black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 
-from megadata.myeval import myeval,myevalasync,fwdapi
 #my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
 
 get_builtins = lambda:{
@@ -29,7 +28,8 @@ def handle_ipc(param):
 
     # TODO if closed
     while True:
-      data = tryx(conn.recv,print)
+      #data = tryx(conn.recv,print)
+      data = tryx(conn.recv)
       if data is None:
         #print('break')
         tryx(conn.close)
@@ -39,7 +39,8 @@ def handle_ipc(param):
 
       #rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
       rt_eval = loop.run_until_complete(try_await(tryx(lambda:myevalasync(data,{"__builtins__":get_builtins()},{}),True)))
-      #print('rt_eval',rt_eval)
+
+      #print('TMP DEBUG rt_eval',rt_eval)
 
       if type(rt_eval) in [list,tuple,dict]:
         #rt = my_encode(rt_eval)
@@ -104,12 +105,12 @@ def start_stdin():
   loop = new_event_loop()
   for line in sys.stdin:
     if line.startswith(';'): # test god mode...
-      print( tryx(lambda:eval(line[1:])) )
+      print('=>', tryx(lambda:eval(line[1:])) )
       # TODO...
-      #print( loop.run_until_complete(tryx(lambda:myevalasync(line[1:])) ))
+      #print( loop.run_until_complete(try_await(tryx(lambda:myevalasync(line[1:])) )))
     else: # test craft mode
       #r = myeval(line,{"__builtins__":get_builtins()},{})
-      r = loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{}))
+      r = loop.run_until_complete(try_await(tryx(lambda:myevalasync(line,{"__builtins__":get_builtins()},{}))))
       print(type(r),r)
 
 # quick test on main

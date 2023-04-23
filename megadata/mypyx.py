@@ -1,6 +1,6 @@
 # mypyx - more gist
 
-from megadata.mypy import *
+from .mypy import *
 
 def sizeof(v):
     vv = v # todo fn/function

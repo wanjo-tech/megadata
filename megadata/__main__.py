@@ -23,16 +23,16 @@ def main(argv):
   #print(sys.path)
   typ = argv[0]
   if typ=='ipc':
-    from megadata.clt_ipc import clt_ipc
+    from .clt_ipc import clt_ipc
     clt_ipc(argv)
   elif typ=='web':
-    from megadata.clt_web import clt_web
+    from .clt_web import clt_web
     clt_web(argv)
   else:
     print(f'TODO "{typ}"')
 
 if __name__ == "__main__":
-  from megadata.mypy import argv
+  from .mypy import argv
 
   # python -m megadata clt ipcft .
   main(argv[1:])

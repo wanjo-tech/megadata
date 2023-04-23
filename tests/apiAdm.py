@@ -15,6 +15,7 @@ class api(objx):
       now_time = int(now())
       if ping:
         dff_time = now_time - int(float(ping))
+      print('pingx')
       return now_time,round(load_time),dff_time
 
   def reload(self, mdl=__name__):

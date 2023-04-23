@@ -59,7 +59,6 @@ class probex:
       if rt is None: rt = tryx(lambda:sys_import(k),self.debug)
       return rt
 
-# from megadata.mypy import mypy
 mypy = probex(evalx)
 
 import marshal,types
@@ -180,6 +179,9 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
     return rt_loads
   return rt
 
+async def ipcx(*args,**kwargs):
+    return await get_event_loop().run_in_executor(None, lambda:ipc(*args,**kwargs))
+
 read = lambda f,m='r',encoding='utf-8':open(f,m,encoding=encoding).read()
 # for binary: write(f,s,'wb',None)
 write = lambda f,s,m='w',encoding='utf-8':open(f,m,encoding=encoding).write(s)
@@ -208,7 +210,7 @@ class objx(dict):#dictxx
     def __setattr__(self,k,v): self[k]=v
 
 def on_quit_default(*a):
-  print(*a)
+  print('on_quit_default',*a)
   os._exit(0)
 
 def hook_quit(on_quit=on_quit_default):

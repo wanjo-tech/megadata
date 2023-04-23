@@ -6,10 +6,19 @@ import sys,os
 #print("__package__",__package__)
 #print("__file__",__file__)
 
+sys.path.insert(0, '..')
+
 path = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, path)
 
-from mypy import try_asyncio
+print('sys.path',sys.path)
+
+import megadata
+print('megadata.load_time=',megadata.load_time)
+print('megadata.module_version=',megadata.module_version)
+
+from megadata.mypy import try_asyncio
+
 ##################################################
 
 import asyncio

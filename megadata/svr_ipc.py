@@ -1,10 +1,8 @@
 #-*- coding: utf-8 -*-
 
 if __name__ == '__main__':
-  from svr_ipc_bin import my_main_ipc,on_quit,start_stdin
-  #from mypy import *
-  from mypy import hook_quit,build_address,try_async,try_asyncio,argc,argv
-  #from megadata.svr_ipc_bin import my_main_ipc,on_quit,start_stdin
+  from .svr_ipc_bin import my_main_ipc,on_quit,start_stdin
+  from .mypy import hook_quit,build_address,try_async,try_asyncio,argc,argv
 
   hook_quit(on_quit)
 

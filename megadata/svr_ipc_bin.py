@@ -10,7 +10,7 @@ from megadata.mypy import *
 white_list = tryx(lambda:load('../tmp/white_list.json'))
 black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 
-from megadata.myeval import myeval,fwdapi
+from megadata.myeval import myeval,myevalasync,fwdapi
 #my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
 
 get_builtins = lambda:{
@@ -23,6 +23,7 @@ get_builtins = lambda:{
 
 import pickle
 def handle_ipc(param):
+    loop = new_event_loop()
     conn,client = param
     assert client is None or len(client)==0 or (white_list is None) or (white_list and client[0] in white_list), f'banned {client}'
 
@@ -36,7 +37,9 @@ def handle_ipc(param):
 
       #print('TMP DEBUG handle_ipc',data)
 
-      rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
+      #rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
+      rt_eval = loop.run_until_complete(try_await(tryx(lambda:myevalasync(data,{"__builtins__":get_builtins()},{}),True)))
+      #print('rt_eval',rt_eval)
 
       if type(rt_eval) in [list,tuple,dict]:
         #rt = my_encode(rt_eval)
@@ -98,11 +101,15 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
 
 def start_stdin():
   #for line in sys.stdin: print(myeval(line))
+  loop = new_event_loop()
   for line in sys.stdin:
     if line.startswith(';'): # test god mode...
       print( tryx(lambda:eval(line[1:])) )
+      # TODO...
+      #print( loop.run_until_complete(tryx(lambda:myevalasync(line[1:])) ))
     else: # test craft mode
-      r = myeval(line,{"__builtins__":get_builtins()},{})
+      #r = myeval(line,{"__builtins__":get_builtins()},{})
+      r = loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{}))
       print(type(r),r)
 
 # quick test on main

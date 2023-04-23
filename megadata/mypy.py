@@ -61,6 +61,23 @@ class probex:
 # from megadata.mypy import mypy
 mypy = probex(evalx)
 
+import marshal,types
+
+# e.g. use('random.random')()
+def use(mdlname,clsname=None):
+  rt = None
+  if type(mdlname) is str:
+    for v in mdlname.split('.'):
+      if rt is None:
+        rt = sys_import(v)
+      else:
+        rt = tryx(lambda:getattr(rt,v))
+      if rt is None: break # safety
+  else:
+    rt = mdlname
+  if clsname: return tryx(lambda:getattr(rt,clsname))
+  return rt
+
 if not flag_py2: # patch for some urlopen case
     # https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading/22253656#22253656
     def patch_connection_pool(**constructor_kwargs):
@@ -166,7 +183,6 @@ save = lambda f,o:write(f,o2s(o))
 
 log = lambda fn,o,ln='\n':write(fn, f'{o if type(o) is str else o2s(o)}{ln}', 'a')
 
-import marshal,types
 dumps_func = lambda func:marshal.dumps(func.__code__)
 loads_func = lambda codes,ctx,name=None:types.FunctionType(marshal.loads(codes),ctx,name=name)
 func2file = lambda fc,fn:write(fn,dumps_func(fc),'wb',None)
@@ -356,10 +372,5 @@ def system(cmd_or_a,stdout_only=True,audit=None):
   result = subprocess.run(cmd_or_a, shell=True, capture_output=True, text=True)
   rt = result.stdout if stdout_only else result
   if audit: audit(rt)
-  return rt
-
-def use(mdlname,clsname=None):
-  rt = sys_import(mdlname)
-  if clsname: return tryx(lambda:getattr(rt,clsname))
   return rt
 

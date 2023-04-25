@@ -126,11 +126,13 @@ async def myevalasync(s,g={},l={},debug=False):
         # try pickle...
         o = tryx(lambda:pickle.loads(s),False)
         if o is None: # not pickle, try bytes str
-            o = tryx(lambda:s.decode())
+            o = tryx(lambda:s.decode(),False)
         if o is None: # try rpc function...
             o = tryx(lambda:loads_func(s,g)) # load by ctx g
             if o is not None:
-              return tryx(o,True)
+              rt = tryx(o,True)
+              if is_awaitable(rt): rt = await rt
+              return rt
         s = o
 
     s = f'{s}'.strip()

@@ -12,7 +12,7 @@ black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 
 #my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
 
-get_builtins = lambda:{
+get_builtins_default = lambda:{
   #'type':type,# expose type is dangerous ;)
   'type':lambda v:str(type(v)),
   'api':fwdapi,
@@ -23,7 +23,7 @@ get_builtins = lambda:{
 import pickle
 def handle_ipc(param):
     #print('param=',param)
-    conn,client = param
+    conn,client,get_builtins = param
     # client could be None when it came from local...
     assert client is None or len(client)==0 or (white_list is None) or (white_list and client[0] in white_list), f'banned {client}'
 
@@ -70,11 +70,16 @@ def handle_ipc(param):
     #tryx(conn.close)
     #return rt
 
-def on_quit(*a):
-  print('on_quit',a)
+def quit(*a):
+  print('quit',a)
   os._exit(0)
 
-def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
+"""
+ipc svr as example and quick usage only
+mode: thread | asyncio | pool
+svr_mode: ipc | ipcx
+"""
+def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,get_builtins=get_builtins_default):
 
   print('my_main_ipc()','svr_mode=',svr_mode,'mode=',mode)
 
@@ -85,7 +90,7 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
     while True:
       conn = tryx(server.accept)
       if conn is None: print('.')
-      else: try_async(lambda:handle_ipc((conn,server.last_accepted)))
+      else: try_async(lambda:handle_ipc((conn,server.last_accepted,get_builtins)))
 
   elif 'asyncio'==mode:
     while True:
@@ -93,7 +98,7 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
       if conn is None: print('.')
       else:
         #print('server.last_accepted',server.last_accepted)
-        try_asyncio(lambda:handle_ipc((conn,server.last_accepted)),new=True)
+        try_asyncio(lambda:handle_ipc((conn,server.last_accepted,get_builtins)),new=True)
 
   else:# pool mode
 
@@ -106,24 +111,23 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None):
       while True:
         conn = tryx(server.accept)
         if conn is None: print('.')
-        else: pool.map_async(handle_ipc, [(conn,server.last_accepted)])
+        else: pool.map_async(handle_ipc, [(conn,server.last_accepted,get_builtins)])
 
-def start_stdin():
+def start_stdin(get_builtins=get_builtins_default):
   #for line in sys.stdin: print(myeval(line))
   loop = new_event_loop()
   for line in sys.stdin:
-    if line.startswith(';'): # test god mode...
-      print('=>', tryx(lambda:eval(line[1:])) )
-      # TODO...
-      #print( loop.run_until_complete(try_await(tryx(lambda:myevalasync(line[1:])) )))
-    else: # test craft mode
+    if line.startswith(';'): # god mode (danger for no masking __builtins__)
+      #print('=>', tryx(lambda:eval(line[1:])) )
+      print(loop.run_until_complete(try_await(tryx(lambda:myevalasync(line[1:])) )))
+    else: # craft mode
       #r = myeval(line,{"__builtins__":get_builtins()},{})
       r = loop.run_until_complete(try_await(tryx(lambda:myevalasync(line,{"__builtins__":get_builtins()},{}))))
       print(type(r),r)
 
 # quick test on main
 if __name__ == '__main__':
-  hook_quit(on_quit)
+  hook_quit(quit)
 
   address = build_address(argv[1], argv[2] if argc>2 else None)
   print('listening',address)

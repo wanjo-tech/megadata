@@ -21,6 +21,9 @@ get_builtins_default = lambda:{
 }
 
 import pickle
+
+# TODO: merge handle_ipc and my_main_ipc as new class later, and then add debug=False
+
 def handle_ipc(param):
     #print('param=',param)
     conn,client,get_builtins = param
@@ -32,7 +35,8 @@ def handle_ipc(param):
     while True:
       #print('recv[')
       #EOFError
-      data = tryx(conn.recv,lambda ex:print(ex,client))
+      #data = tryx(conn.recv,lambda ex:print(ex,client))
+      data = tryx(conn.recv,lambda ex:(log1('#'),flush1()))
       #print('recv]')
       if data is None:
         #print('break')
@@ -70,8 +74,8 @@ def handle_ipc(param):
     #tryx(conn.close)
     #return rt
 
-def quit(*a):
-  print('quit',a)
+def on_quit(*a):
+  print('on_quit',a)
   os._exit(0)
 
 """
@@ -79,7 +83,7 @@ ipc svr as example and quick usage only
 mode: thread | asyncio | pool
 svr_mode: ipc | ipcx
 """
-def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,get_builtins=get_builtins_default):
+def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,get_builtins=get_builtins_default,debug=False):
 
   print('my_main_ipc()','svr_mode=',svr_mode,'mode=',mode)
 
@@ -127,7 +131,7 @@ def start_stdin(get_builtins=get_builtins_default):
 
 # quick test on main
 if __name__ == '__main__':
-  hook_quit(quit)
+  hook_quit(on_quit)
 
   address = build_address(argv[1], argv[2] if argc>2 else None)
   print('listening',address)

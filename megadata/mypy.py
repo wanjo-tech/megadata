@@ -179,9 +179,6 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
     return rt_loads
   return rt
 
-async def ipcx(*args,**kwargs):
-    return await get_event_loop().run_in_executor(None, lambda:ipc(*args,**kwargs))
-
 read = lambda f,m='r',encoding='utf-8':open(f,m,encoding=encoding).read()
 # for binary: write(f,s,'wb',None)
 write = lambda f,s,m='w',encoding='utf-8':open(f,m,encoding=encoding).write(s)
@@ -274,24 +271,6 @@ def parallel(func, a, pool_size=None,chunksize=None,mode='default',map_async=Fal
   else:
     return Pool(pool_size).map(func, a, chunksize=chunksize)
 
-from asyncio import Semaphore,gather,wait_for
-# asyncio version of parallel()
-async def parallelx(async_func, a, pool_size=None, timeout=30):
-    async def limited_concurrent_tasks(semaphore, async_func, arg):
-        async with semaphore:
-            #return await async_func(arg)
-            return await wait_for(async_func(arg),timeout=timeout)
-    if pool_size is None:
-      from os import cpu_count
-      pool_size =  cpu_count()
-    semaphore = Semaphore(pool_size)
-    from concurrent.futures import ThreadPoolExecutor
-    with ThreadPoolExecutor() as pool:
-        loop = get_event_loop()
-        #tasks = [loop.create_task(async_func(arg)) for arg in a]
-        tasks = [loop.create_task(limited_concurrent_tasks(semaphore,async_func,arg)) for arg in a]
-        return await gather(*tasks)
-
 def mygc():
     import gc
     import sys
@@ -336,17 +315,6 @@ def yielder_loop(func,wrap=tryx,do_yield=True):
 Thread = mypy.threading.Thread
 def try_async(func): Thread(target=func).start()
 
-import asyncio
-
-from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,Semaphore,gather
-is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
-async def try_await(o):
-  if is_awaitable(o):
-    return await o
-  return o
-
-try_asyncio = lambda func,new=False:(new_event_loop if new else get_event_loop)().run_in_executor(None,func)
-  
 # for ipc()
 def build_address(arg1,arg2=None,folder='../tmp/'):
   port = tryx(lambda:int(arg1),False)
@@ -380,6 +348,47 @@ def system(cmd_or_a,stdout_only=True,audit=None):
   rt = result.stdout if stdout_only else result
   if audit: audit(rt)
   return rt
+
+#################### async tools
+
+import asyncio
+from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,sleep as sleep_async
+
+# asyncio version of parallel()
+async def parallelx(async_func, a, pool_size=None, timeout=30):
+    from asyncio import Semaphore,gather,wait_for
+    async def limited_concurrent_tasks(semaphore, async_func, arg):
+        async with semaphore:
+            #return await async_func(arg)
+            return await wait_for(async_func(arg),timeout=timeout)
+    if pool_size is None:
+      from os import cpu_count
+      pool_size =  cpu_count()
+    semaphore = Semaphore(pool_size)
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor() as pool:
+        loop = get_event_loop()
+        #tasks = [loop.create_task(async_func(arg)) for arg in a]
+        tasks = [loop.create_task(limited_concurrent_tasks(semaphore,async_func,arg)) for arg in a]
+        return await gather(*tasks)
+
+is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
+async def try_await(o):
+  if is_awaitable(o):
+    return await o
+  return o
+
+# try async using asyncio
+try_asyncio = lambda func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,func)
+
+run_until_complete = lambda fn:new_event_loop().run_until_complete(try_await(fn))
+
+#diff from js, it's not a Promise...
+#ipcx = lambda *args,**kwargs:try_asyncio(lambda:ipc(*args,**kwargs))
+async def ipcx(*args,**kwargs):
+    #return await get_event_loop().run_in_executor(None, lambda:ipc(*args,**kwargs))
+    return await try_asyncio(lambda:ipc(*args,**kwargs))
+
 
 #################### DELETED
 #sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload

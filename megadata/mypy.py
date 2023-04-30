@@ -375,17 +375,18 @@ async def parallelx(async_func, a, pool_size=None, timeout=30):
         return await gather(*tasks)
 
 is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
-async def try_await(o):
-  if is_awaitable(o):
-    return await o
-  return o
 
-try_asyncio = lambda func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,func)
+async def try_await(o): return await o if is_awaitable(o) else o
 
-# TODO add timeout=None => wait_for ... timeout
-# NOTES: await fn() <like> run_until_complete(fn,new=False)
-#run_until_complete = lambda fn,new=True:(new_event_loop if new else get_event_loop)().run_until_complete(try_await(fn))
-run_until_complete = lambda fn,new=True,timeout=0:(new_event_loop if new else get_event_loop)().run_until_complete(try_await(fn) if timeout==0 else wait_for(try_await(fn),timeout=timeout))
+try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
+
+async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
+
+def run_until_complete(fn,new=True,timeout=0):
+  if callable(fn): new=False
+  loop = (new_event_loop if new else get_event_loop)()
+  async_o = try_asyncio_async(fn) if callable(fn) else try_await(fn) if timeout==0 else wait_for(try_await(fn),timeout=timeout)
+  return loop.run_until_complete(async_o)
 
 #diff from js, it's not a Promise...
 #XXX: ipcx = lambda *args,**kwargs:try_asyncio(lambda:ipc(*args,**kwargs))

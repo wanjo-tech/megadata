@@ -63,7 +63,6 @@ mypy = probex(evalx)
 
 import marshal,types
 
-# e.g. use('random.random')()
 def use(mdlname,clsname=None,reload=False):
   rt = None
   if type(mdlname) is str:
@@ -79,6 +78,8 @@ def use(mdlname,clsname=None,reload=False):
       rt = tryx(lambda:getattr(rt,v))
       if rt is None: break # safety
   return rt
+
+useapi = lambda c,m,*args,**kwargs: getattr(use(c,'api')(*args,**kwargs),m)
 
 #if not flag_py2: # patch for some urlopen case
 if True:
@@ -354,9 +355,10 @@ def system(cmd_or_a,stdout_only=True,audit=None):
 import asyncio
 from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,sleep as sleep_async
 
+from asyncio import Semaphore,gather,wait_for
+
 # asyncio version of parallel()
 async def parallelx(async_func, a, pool_size=None, timeout=30):
-    from asyncio import Semaphore,gather,wait_for
     async def limited_concurrent_tasks(semaphore, async_func, arg):
         async with semaphore:
             #return await async_func(arg)
@@ -378,15 +380,16 @@ async def try_await(o):
     return await o
   return o
 
-# try async using asyncio
 try_asyncio = lambda func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,func)
 
-run_until_complete = lambda fn:new_event_loop().run_until_complete(try_await(fn))
+# TODO add timeout=None => wait_for ... timeout
+# NOTES: await fn() <like> run_until_complete(fn,new=False)
+#run_until_complete = lambda fn,new=True:(new_event_loop if new else get_event_loop)().run_until_complete(try_await(fn))
+run_until_complete = lambda fn,new=True,timeout=0:(new_event_loop if new else get_event_loop)().run_until_complete(try_await(fn) if timeout==0 else wait_for(try_await(fn),timeout=timeout))
 
 #diff from js, it's not a Promise...
-#ipcx = lambda *args,**kwargs:try_asyncio(lambda:ipc(*args,**kwargs))
+#XXX: ipcx = lambda *args,**kwargs:try_asyncio(lambda:ipc(*args,**kwargs))
 async def ipcx(*args,**kwargs):
-    #return await get_event_loop().run_in_executor(None, lambda:ipc(*args,**kwargs))
     return await try_asyncio(lambda:ipc(*args,**kwargs))
 
 

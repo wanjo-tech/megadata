@@ -48,7 +48,8 @@ def handle_ipc(param):
       #print('TMP DEBUG handle_ipc',data)
 
       #rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
-      rt_eval = loop.run_until_complete(try_await(tryx(lambda:myevalasync(data,{"__builtins__":get_builtins()},{}),True)))
+      #rt_eval = loop.run_until_complete(try_await(tryx(lambda:myevalasync(data,{"__builtins__":get_builtins()},{}),True)))
+      rt_eval = tryx(lambda:loop.run_until_complete(myevalasync(data,{"__builtins__":get_builtins()},{})),True)
 
       #print('TMP DEBUG rt_eval',rt_eval)
 
@@ -123,10 +124,12 @@ def start_stdin(get_builtins=get_builtins_default):
   for line in sys.stdin:
     if line.startswith(';'): # god mode (danger for no masking __builtins__)
       #print('=>', tryx(lambda:eval(line[1:])) )
-      print(loop.run_until_complete(try_await(tryx(lambda:myevalasync(line[1:])) )))
+      #print(loop.run_until_complete(try_await(tryx(lambda:myevalasync(line[1:])) )))
+      print(tryx(lambda:loop.run_until_complete(myevalasync(line[1:])) ))
     else: # craft mode
       #r = myeval(line,{"__builtins__":get_builtins()},{})
-      r = loop.run_until_complete(try_await(tryx(lambda:myevalasync(line,{"__builtins__":get_builtins()},{}))))
+      #r = loop.run_until_complete(try_await(tryx(lambda:myevalasync(line,{"__builtins__":get_builtins()},{}))))
+      r = tryx(lambda:loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{})))
       print(type(r),r)
 
 # quick test on main

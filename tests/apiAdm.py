@@ -18,6 +18,12 @@ class api(objx):
       print('pingx')
       return now_time,round(load_time),dff_time
 
+  async def errx1(self, ping=None):
+      print('before assert')
+      assert False, 'error test errx1'
+      print('after assert')
+      return 1
+
   def reload(self, mdl=__name__):
 
     if type(self.param) is dict:

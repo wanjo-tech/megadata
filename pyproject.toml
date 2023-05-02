@@ -1,6 +1,6 @@
 [project]
 name = "megadata"
-version = "0.0.35"
+version = "0.0.36"
 authors = [
   { name="Wanjo Chan", email="wanjochan@gmail.com" },
 ]

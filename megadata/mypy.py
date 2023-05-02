@@ -107,7 +107,7 @@ import json
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, obj): return tryx(lambda:json.JSONEncoder.default(self,obj))
 s2o = lambda s:tryx(lambda:json.loads(s),False)
-o2s = lambda o,indent=None:tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder))
+o2s = lambda o,indent=None,separators=(',',':'):tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder, separators=separators))
 
 from pickle import dumps as o2b, loads as b2o
 

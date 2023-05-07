@@ -18,8 +18,8 @@ def fwdapi(c,m,*args,**kwargs):
   #print('DEBUG fwdapi',[c,m,args],'=>',rt)
   return rt
 
-# deprecated !!!!
 def myeval(s,g={},l={},debug=False):
+    print("myeval() is deprecated, using myevalasync asap")
 
     if type(s) is bytes: # try pickle/loads_func/...
         import pickle
@@ -174,7 +174,7 @@ async def myevalasync(s,g={},l={},debug=False):
 
     # dict-come-dict-go, old and please try not to use...
     elif s[0]=='{':
-        # deprecated ,dict mode is not good too
+        # deprecated ,dict mode is not good
         call_style = 2
         call_entry = a.get('entry',None)
         call_param = a.get('param',[])
@@ -182,7 +182,7 @@ async def myevalasync(s,g={},l={},debug=False):
         flg_right = True
 
     elif a is None: # assume: quick console mode sep by comma (not good for special case...)
-        # deprecated, quick-console-mode is not good ;)
+        # quick-console-mode only
         call_style = 3
         #a = s.split('\t')
         s=s.replace('\t','')

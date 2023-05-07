@@ -2,8 +2,7 @@
 
 # py-coding-simplifer by Wanjo
 
-#from time import time as now, mktime, sleep
-from time import time as now, mktime
+from time import time as now, mktime, sleep
 
 load_time = now()
 
@@ -395,8 +394,7 @@ async def ipcx(*args,**kwargs):
     return await try_asyncio(lambda:ipc(*args,**kwargs))
 
 #from asyncio import sleep as sleep_async,new_event_loop
-# new sync sleep that won't block process
-sleep = lambda t:new_event_loop().run_until_complete(sleep_async(t))
+#new_sleep = lambda t:new_event_loop().run_until_complete(sleep_async(t))
 
 #################### DELETED
 #sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload

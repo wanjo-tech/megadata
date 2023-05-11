@@ -13,8 +13,8 @@ black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 #my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
 
 get_builtins_default = lambda:{
-  #'type':type,# expose type is dangerous ;)
-  'type':lambda v:str(type(v)),
+  #'type':type,# directly exposing type is dangerous ;)
+  'type':lambda v:str(type(v)), # safer
   'api':fwdapi,
   'ping':now(),
   'print':print,

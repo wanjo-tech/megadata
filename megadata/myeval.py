@@ -1,13 +1,10 @@
-# eval tool by wanjo 20220925
-
-from .mypy import tryx,s2o,sys_import,loads_func,now,use,sys,is_awaitable
-
+# eval tool by wanjo 20230511
+from .mypy import *
 load_time = now()
 
-# TODO
-# use(c,'api')(*args,**kwargs)
-# useapi = lambda c,m,*args,**kwargs: getattr(use(c,'api')(*args,**kwargs),m)
+# TODO:
 # loadapi(c,m,request=request)(*args,**kwargs)
+# fix lambda:__builtins__ bug??
 
 # old way, deprecated, will remove soon
 def fwd(c,m,param_a): return tryx(lambda:getattr(sys_import(c).api(param_a),m)(*param_a),lambda ex:{'errmsg':str(ex)})
@@ -19,14 +16,15 @@ def fwdapi(c,m,*args,**kwargs):
   return rt
 
 def myeval(s,g={},l={},debug=False):
-    print("myeval() is deprecated, using myevalasync asap")
+    rt = None
+    # TODO merge with myevalasync?
 
     if type(s) is bytes: # try pickle/loads_func/...
         import pickle
         # try pickle...
         o = tryx(lambda:pickle.loads(s),False)
         if o is None: # not pickle, try bytes str
-            o = tryx(lambda:s.decode())
+            o = tryx(lambda:s.decode(),False)
         if o is None: # try rpc function...
             o = tryx(lambda:loads_func(s,g)) # load by ctx g
             if o is not None:
@@ -37,7 +35,7 @@ def myeval(s,g={},l={},debug=False):
     if len(s)<1: return None
     a = s2o(s)
     if debug: print(f'===In: {a or s}')
-    flg_right = False
+    #flg_right = False
     call_id = None
     call_param = None
     call_style = None
@@ -55,17 +53,19 @@ def myeval(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a[0]
-            flg_right = True
+            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            flg_right = True
+            #flg_right = True
 
     elif s[0]=='(' or s[0]=='/': # pyql ;)
         s=s.replace('__builtins__','') # safe-guard ;)
         if s[0]=='/': s = s[1:]
         #return str(tryx(lambda:eval(s,g,l),True)) # DEBUG: testing no str...
-        return tryx(lambda:eval(s,g,l),True)
+        #return tryx(lambda:eval(s,g,l),True)
+        rt = tryx(lambda:eval(s,g,l),True)
+        #return rt
 
     # dict-come-dict-go, old and please try not to use...
     elif s[0]=='{':
@@ -74,7 +74,7 @@ def myeval(s,g={},l={},debug=False):
         call_entry = a.get('entry',None)
         call_param = a.get('param',[])
         call_id = a.get('id',None)
-        flg_right = True
+        #flg_right = True
 
     elif a is None: # assume: quick console mode sep by comma (not good for special case...)
         # deprecated, quick-console-mode is not good ;)
@@ -89,13 +89,14 @@ def myeval(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a0i or a[0]
-            flg_right = True
+            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            flg_right = True
+            #flg_right = True
 
-    if flg_right:
+    #if flg_right:
+    if rt is None:
         a = call_entry.split('.')
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
@@ -104,8 +105,7 @@ def myeval(s,g={},l={},debug=False):
             # TMP fwd to api{c}.m(call_param)
             # TODO should using *args,**kwargs
             rt = fwd(f'api{a[0]}',a[1],call_param)
-    else:
-        rt = {'errmsg':'TODO'}
+    #else: rt = {'errmsg':'TODO'}
 
     if debug:print(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
 
@@ -114,12 +114,14 @@ def myeval(s,g={},l={},debug=False):
             return [rt] # 
         else:
             return [call_id,rt]
-    elif call_style in [2,3]: # dict mode or quick console mode
-        return rt
-    else:
-        return None
+    else: return rt
+    #elif call_style in [2,3]: # dict mode or quick console mode
+    #    return rt
+    #else:
+    #    return None
 
 async def myevalasync(s,g={},l={},debug=False):
+    rt = None
 
     if type(s) is bytes: # try pickle/loads_func/...
         import pickle
@@ -139,7 +141,7 @@ async def myevalasync(s,g={},l={},debug=False):
     if len(s)<1: return None
     a = s2o(s)
     if debug: print(f'===In: {a or s}')
-    flg_right = False
+    #flg_right = False
     call_id = None
     call_param = None
     call_style = None
@@ -157,11 +159,11 @@ async def myevalasync(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a[0]
-            flg_right = True
+            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            flg_right = True
+            #flg_right = True
 
     elif s[0]=='(' or s[0]=='/': # pyql ;)
         s=s.replace('__builtins__','') # safe-guard ;)
@@ -179,7 +181,7 @@ async def myevalasync(s,g={},l={},debug=False):
         call_entry = a.get('entry',None)
         call_param = a.get('param',[])
         call_id = a.get('id',None)
-        flg_right = True
+        #flg_right = True
 
     elif a is None: # assume: quick console mode sep by comma (not good for special case...)
         # quick-console-mode only
@@ -194,13 +196,14 @@ async def myevalasync(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a0i or a[0]
-            flg_right = True
+            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            flg_right = True
+            #flg_right = True
 
-    if flg_right:
+    #if flg_right:
+    if rt is None:
         a = call_entry.split('.')
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
@@ -221,26 +224,9 @@ async def myevalasync(s,g={},l={},debug=False):
             return [rt] # 
         else:
             return [call_id,rt]
-    elif call_style in [2,3]: # dict mode or quick console mode
-        return rt
-    else:
-        return None
-
-if __name__ == '__main__':
-  """ e.g.
-  /now
-  /help
-  (help)
-  ["Adm.ping"]
-  Adm.ping
-  /api('Adm','ping')
-  (type(type))
-  """
-  for line in sys.stdin:
-    r = tryx(lambda:myeval(line,{"__builtins__":{
-    'type':type,
-    'api':fwdapi,
-    'now':now(),'help':'nothing to help u unless u read the source codes'
-  }}))
-    print(type(r),r)
+    else: return rt
+    #elif call_style in [2,3]: # dict mode or quick console mode
+    #    return rt
+    #else:
+    #    return None
 

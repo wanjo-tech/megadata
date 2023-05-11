@@ -49,5 +49,3 @@ def clt_ipc(argv):
       rt = tryx(lambda:server(line))
       print(type(rt),'=>',rt)
 
-if __name__ == '__main__':
-  clt_ipc(argv)

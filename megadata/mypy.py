@@ -374,12 +374,12 @@ async def parallelx(async_func, a, pool_size=None, timeout=30):
         tasks = [loop.create_task(limited_concurrent_tasks(semaphore,async_func,arg)) for arg in a]
         return await gather(*tasks)
 
-is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
+from inspect import isawaitable as is_awaitable
+#is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
 
 async def try_await(o): return await o if is_awaitable(o) else o
 
 try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
-
 async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
 
 def run_until_complete(fn,new=True,timeout=0):

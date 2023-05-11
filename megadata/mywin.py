@@ -439,11 +439,11 @@ def input(h, s, sleep=0.02, focus=True, clear=False):
     for c in str(s): win_input_c(h,c,sleep)
     return myself
 
-def paste(h, txt, pos = (0,0), focus=False, restore=False, mode='ctrlv', debug=False):
+def paste(h, txt, pos = (0,0), focus=False, restore=False, mode='ctrlv', sleep=0.01,debug=False):
     if focus: win_focus(h)
 
     if mode=='input' or tryx(lambda:int(txt),False) is not None: # fix bug about int
-      input(h,txt)
+      input(h,txt,sleep=sleep)
     else:
       txt = str(txt)
       win32clipboard.OpenClipboard()
@@ -456,7 +456,7 @@ def paste(h, txt, pos = (0,0), focus=False, restore=False, mode='ctrlv', debug=F
           _long =win32api.MAKELONG(pos[0],pos[1])
           if debug: print('paste',_long)
           tryx(lambda:SendMessage(h,win32con.WM_PASTE,0,_long))
-      else:
+      else: # default ctrl-v
           ctrl_key(h,key=86) #ctrl-v = 86
       if restore:
           win32clipboard.OpenClipboard()
@@ -666,13 +666,13 @@ def ensure_win_mx(h,sleep_else=0,sleep_mx=1):
     return rt
 
 ###############################
-def wx_send(who,txt,mode='ctrlv',debug=True):
+def wx_send(who,txt,mode='input',debug=True):
     w=tryx(lambda:win_find(0,cls='ChatWnd',txt=who)[0][0],False)
     if w:
         rect = win_rect(w)
         win_click(w,1,(60,rect[3]-rect[1]-60))
         time.sleep(0.1)
-        paste(w,txt,mode='ctrlv')
+        paste(w,txt,mode=mode)
         time.sleep(0.1)
         PostMessage(w, win32con.WM_KEYDOWN, win32con.VK_RETURN,0)
     else:

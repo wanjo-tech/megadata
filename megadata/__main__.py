@@ -34,8 +34,15 @@ def main(argv):
 if __name__ == "__main__":
   from .mypy import argv
 
-  # python -m megadata clt ipcft .
-  main(argv[1:])
+  assert len(argv)>1, f'todo {argv}'
+
+  # python -i -m megadata rpc
+  if argv[1]=='rpc':
+    from .mypy import *
+    #>>> rpc(build_address(3388))('Adm','pingx')
+  else:
+    # e.g. python -m megadata clt ipcft .
+    main(argv[1:])
 
 #else:
 #  print(__name__,argv)

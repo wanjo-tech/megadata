@@ -23,7 +23,9 @@ def clt_ipc(argv):
     if line.startswith('lambda'): # TMP TEST RPC
       fc = eval(line)
       #print('debug fc',fc,fc.__code__)
-      print(server(dumps_func(fc)))
+      b = dumps_func(fc)
+      #print('debug fc',len(b),b)
+      print(server(b))
 
     # e.g. /"Adm","ping"
     # have fund like /"Adm","ping",*args,**kwargs

@@ -180,15 +180,15 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
     return rt_loads
   return rt
 
-#build_api_closure=lambda *args,**kwargs:eval(f'lambda:api(*{args},**{kwargs})')
-#
-#def rpc(u,authkey=None,out=None,timeout=7):
-#  def rpc_func(*rpc_args,**rpc_kwargs):
-#    c = build_api_closure(*rpc_args,**rpc_kwargs)
-#    b = dumps_func(c)
-#    s=ipc(u,b,authkey=authkey,out=out,timeout=timeout)
-#    return s2o(s)
-#  return rpc_func
+build_api_closure=lambda *args,**kwargs:eval(f'lambda:api(*{args},**{kwargs})')
+
+def rpc(u,authkey=None,out=None,timeout=7):
+  def rpc_func(*rpc_args,**rpc_kwargs):
+    c = build_api_closure(*rpc_args,**rpc_kwargs)
+    b = dumps_func(c)
+    s=ipc(u,b,authkey=authkey,out=out,timeout=timeout)
+    return s2o(s)
+  return rpc_func
 
 read = lambda f,m='r',encoding='utf-8':open(f,m,encoding=encoding).read()
 # for binary: write(f,s,'wb',None)
@@ -361,6 +361,14 @@ def system(cmd_or_a,stdout_only=True,audit=None):
   return rt
 
 #################### async tools
+
+def rpcx(u,authkey=None,out=None,timeout=7):
+  async def rpc_func(*rpc_args,**rpc_kwargs):
+    c = build_api_closure(*rpc_args,**rpc_kwargs)
+    b = dumps_func(c)
+    s=await ipcx(u,b,authkey=authkey,out=out,timeout=timeout)
+    return s2o(s)
+  return rpc_func
 
 import asyncio
 from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,sleep as sleep_async

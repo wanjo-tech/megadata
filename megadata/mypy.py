@@ -362,13 +362,6 @@ def system(cmd_or_a,stdout_only=True,audit=None):
 
 #################### async tools
 
-def rpcx(u,authkey=None,out=None,timeout=7):
-  async def rpc_func(*rpc_args,**rpc_kwargs):
-    c = build_api_closure(*rpc_args,**rpc_kwargs)
-    b = dumps_func(c)
-    s=await ipcx(u,b,authkey=authkey,out=out,timeout=timeout)
-    return s2o(s)
-  return rpc_func
 
 import asyncio
 from asyncio import iscoroutinefunction,iscoroutine,run as asyncio_run,get_event_loop,new_event_loop,set_event_loop,sleep as sleep_async
@@ -398,6 +391,8 @@ from inspect import isawaitable as is_awaitable
 async def try_await(o): return await o if is_awaitable(o) else o
 
 try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
+
+# NOTES: try_asyncio() return a "Future" obj which is not good for run_until_complete(), so here try_asyncio_async()
 async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
 
 def run_until_complete(fn,new=True,timeout=0):
@@ -406,14 +401,19 @@ def run_until_complete(fn,new=True,timeout=0):
   async_o = try_asyncio_async(fn) if callable(fn) else try_await(fn) if timeout==0 else wait_for(try_await(fn),timeout=timeout)
   return loop.run_until_complete(async_o)
 
-#diff from js, it's not a Promise...
-#XXX: ipcx = lambda *args,**kwargs:try_asyncio(lambda:ipc(*args,**kwargs))
-async def ipcx(*args,**kwargs):
-    return await try_asyncio(lambda:ipc(*args,**kwargs))
+# some block-sync to non-block-async: 
+ipcx = lambda *args,**kwargs:try_asyncio_async(lambda:ipc(*args,**kwargs))
+wcx = lambda *args,**kwargs:try_asyncio_async(lambda:wc(*args,**kwargs))
+sleepx = lambda *args:try_asyncio_async(lambda:sleep(*args))
 
-#from asyncio import sleep as sleep_async,new_event_loop
-#new_sleep = lambda t:new_event_loop().run_until_complete(sleep_async(t))
-
+# e.g. run_until_complete(rpcx(build_address(3388))('Adm','pingx'))
+def rpcx(u,authkey=None,out=None,timeout=7):
+  async def rpc_func(*rpc_args,**rpc_kwargs):
+    c = build_api_closure(*rpc_args,**rpc_kwargs)
+    b = dumps_func(c)
+    s=await ipcx(u,b,authkey=authkey,out=out,timeout=timeout)
+    return s2o(s)
+  return rpc_func
 #################### DELETED
 #sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
 #sys_import = __import__

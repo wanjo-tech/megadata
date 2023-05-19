@@ -15,7 +15,6 @@ python -m pip install -U megadata
 ## client shell for databases or servers ;)
 * python -m megadata *args **kwargs
 
-```
-```
+# NOTES:
 
-## TODO scheme myipc:// ??
+## 1. for fastapi server, some "blocking" func need to wrap with try_asyncio

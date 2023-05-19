@@ -1,24 +1,51 @@
-from .mypy import *
-
+from inc_mypy import *
 
 hook_quit(on_quit_default)
 
-def clt_ipc(argv):
+import asyncio
+if sys.platform=='win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+#import zmq
+#import zmq.asyncio
+#
+#ctx = zmq.asyncio.Context()
+#
+#socket = context.socket(zmq.REQ)
+#socket.connect(url)
+
+#endpoint = socket.getsockopt_string(zmq.LAST_ENDPOINT)
+#print("endpoint=", endpoint)
+#
+#ROUTING_ID = socket.getsockopt_string(zmq.ROUTING_ID)
+#print("ROUTING_ID=", ROUTING_ID)
+
+def clt_zmq(argv):
   print('clt_ipc',argv)
-  argc = len(argv)
-  address = build_address(argv[1], argv[2] if argc>2 else None)
+  address = argv[1]
   print('address=',address)
 
-  # out={} # reusing has bug yet, todo
-  #server= lambda v: ipc(address, v, out=out)
+  import zmq
+
+  # TODO zmq.asyncio
+  #import zmq.asyncio
+  #ctx = zmq.asyncio.Context()
+
+  # sync mode
+  context = zmq.Context()
+  socket = context.socket(zmq.REQ)
+  socket.connect(address)
+
   def server(v):
-    #return ipc(address,v,out=out)
-    return ipc(address,v)
+    if type(v) is str: v = v.encode()
+    socket.send(v)
+    return socket.recv()
 
   import pickle
   for line in sys.stdin:
 
-    if line.startswith('lambda'): # TMP TEST RPC
+    if line.startswith(':'): line = 'lambda' + line
+    if line.startswith('lambda'): #
       fc = eval(line)
       #print('debug fc',fc,fc.__code__)
       b = dumps_func(fc)
@@ -48,4 +75,8 @@ def clt_ipc(argv):
     else:
       rt = tryx(lambda:server(line))
       print(type(rt),'=>',rt)
+
+if __name__ == '__main__':
+    #asyncio.run(main())
+    clt_zmq(argv)
 

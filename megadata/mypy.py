@@ -79,6 +79,7 @@ def use(mdlname,clsname=None,reload=False):
       if rt is None: break # safety
   return rt
 
+# e.g. func = useapi(f'api{c}',m,request=request,post_s=post_s,post_o=post_o)
 useapi = lambda c,m,*args,**kwargs: getattr(use(c,'api')(*args,**kwargs),m)
 
 #if not flag_py2: # patch for some urlopen case
@@ -395,6 +396,7 @@ try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new el
 # NOTES: try_asyncio() return a "Future" obj which is not good for run_until_complete(), so here try_asyncio_async()
 async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
 
+# somehow like asyncio_run
 def run_until_complete(fn,new=True,timeout=0):
   if callable(fn): new=False
   loop = (new_event_loop if new else get_event_loop)()

@@ -24,11 +24,13 @@ if __name__ == '__main__':
   #  return ipc(address,v)
 
   def server(v):
-    return tryx(lambda:myeval(v,{"__builtins__":{
-    'type':type,
-    'api':fwdapi,
-    'now':now(),'help':'nothing to help u unless u read the source codes'
-  }}))
+    o_globals = {"__builtins__":{
+      'type':type,
+      'api':fwdapi,
+      'now':now(),'help':'nothing to help u unless u read the source codes'
+    }}
+    #return tryx(lambda:myeval(v,o_globals))
+    return run_until_complete(myevalasync(v,o_globals))
 
 
   """ e.g.

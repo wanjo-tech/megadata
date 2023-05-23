@@ -6,3 +6,4 @@
 *.swp
 /megadata/tests/__pycache__
 /tests/__pycache__/*.pyc
+/__pycache__/*.pyc

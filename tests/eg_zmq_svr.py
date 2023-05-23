@@ -1,14 +1,9 @@
 from inc_mypy import *
 hook_quit(on_quit_default)
 
-#import zmq
-#context = zmq.Context()
-#socket = context.socket(zmq.REQ)
-#socket.connect("tcp://localhost:5555")
-#
-#endpoint = socket.getsockopt_string(zmq.LAST_ENDPOINT)
-#print("Last endpoint:", endpoint)
 ###################################################
+
+# TODO https://github.com/aio-libs/aiozmq
 
 #from .myeval import myeval,myevalasync,fwdapi
 from megadata.myeval import myeval,myevalasync,fwdapi

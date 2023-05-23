@@ -391,12 +391,22 @@ async def parallelx(async_func, a, pool_size=None, timeout=30):
 from inspect import isawaitable as is_awaitable
 #is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
 
-async def try_await(o): return await o if is_awaitable(o) else o
+async def try_await(o):
+  rt = o
+  while is_awaitable(rt):
+    rt = await rt
+  return rt
 
 try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
 
 # NOTES: try_asyncio() return a "Future" obj which is not good for run_until_complete(), so here try_asyncio_async()
-async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
+#async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
+#async def try_asyncio_async(sync_func,new=False):
+#  rt = await try_asyncio(sync_func,new)
+#  while is_awaitable(rt):
+#    rt = await rt
+#  return rt
+async def try_asyncio_async(sync_func,new=False): return await try_await(try_asyncio(sync_func,new))
 
 # somehow like asyncio_run
 def run_until_complete(fn,new=True,timeout=0):
@@ -410,7 +420,6 @@ ipcx = lambda *args,**kwargs:try_asyncio_async(lambda:ipc(*args,**kwargs))
 wcx = lambda *args,**kwargs:try_asyncio_async(lambda:wc(*args,**kwargs))
 sleepx = lambda *args:try_asyncio_async(lambda:sleep(*args))
 
-# e.g. run_until_complete(rpcx(build_address(3388))('Adm','pingx'))
 def rpcx(u,authkey=None,out=None,timeout=7):
   async def rpc_func(*rpc_args,**rpc_kwargs):
     c = build_api_closure(*rpc_args,**rpc_kwargs)

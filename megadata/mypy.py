@@ -361,6 +361,8 @@ def system(cmd_or_a,stdout_only=True,audit=None):
   if audit: audit(rt)
   return rt
 
+system_call = lambda cmd: subprocess.call(cmd,shell=True)
+
 #################### async tools
 
 

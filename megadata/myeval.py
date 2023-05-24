@@ -104,8 +104,6 @@ def myeval(s,g={},l={},debug=False):
             # TMP fwd to api{c}.m(call_param)
             # TODO should using *args,**kwargs
             rt = fwd(f'api{a[0]}',a[1],call_param)
-    else:
-        rt = {'errmsg':'TODO'}
 
     if is_awaitable(rt): return rt
 

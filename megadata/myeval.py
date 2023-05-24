@@ -34,7 +34,6 @@ def myeval(s,g={},l={},debug=False):
     if len(s)<1: return None
     a = s2o(s)
     if debug: print(f'===In: {a or s}')
-    #flg_right = False
     call_id = None
     call_param = None
     call_style = None
@@ -52,11 +51,9 @@ def myeval(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a[0]
-            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            #flg_right = True
 
     elif s[0]=='(' or s[0]=='/': # pyql ;)
         s=s.replace('__builtins__','') # safe-guard ;)
@@ -73,14 +70,11 @@ def myeval(s,g={},l={},debug=False):
         call_entry = a.get('entry',None)
         call_param = a.get('param',[])
         call_id = a.get('id',None)
-        #flg_right = True
 
-    elif a is None: # assume: quick console mode sep by comma (not good for special case...)
-        # deprecated, quick-console-mode is not good ;)
+    elif a is None: # assume: simple quick console mode sep by comma
         call_style = 3
-        #a = s.split('\t')
         s=s.replace('\t','')
-        a = s.split(',') # not good for some quote case! for that should /api(...)
+        a = s.split(',')
         len_a = len(a)
         a0i = tryx(lambda:int(a[0]),False)
         if len_a>1 and type(a0i) is int:
@@ -88,13 +82,10 @@ def myeval(s,g={},l={},debug=False):
             call_entry = a[1]
             call_param = tryx(lambda:a[2:],False)
             call_id = a0i or a[0]
-            #flg_right = True
         elif len_a>0:
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
-            #flg_right = True
 
-    #if flg_right:
     if rt is None:
         a = call_entry.split('.')
         if len(a)<2:
@@ -105,20 +96,19 @@ def myeval(s,g={},l={},debug=False):
             # TODO should using *args,**kwargs
             rt = fwd(f'api{a[0]}',a[1],call_param)
 
-    if is_awaitable(rt): return rt
+    #if is_awaitable(rt): return rt
+    # 2023-05-24 make the async-awaitable to sync
+    if is_awaitable(rt):
+      rt = run_until_complete(try_await(rt))
 
     if debug:print(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
 
-    if call_style==1: # list mode
+    if call_style==1: # list-in-list-out mode
         if call_id is None:
             return [rt] # 
         else:
             return [call_id,rt]
     else: return rt
-    #elif call_style in [2,3]: # dict mode or quick console mode
-    #    return rt
-    #else:
-    #    return None
 
 #async def myevalasync(*args,**kwargs):
 #  # return await try_await( await try_asyncio_async(lambda:myeval(*args,**kwargs)) )

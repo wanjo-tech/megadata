@@ -1,5 +1,9 @@
 if __name__ == '__main__':
 
+  # python tests\test_myeval.py
+  # /api('Adm','pingx')
+  # Adm.ping
+
   import sys,os
 
   #print("__package__",__package__)

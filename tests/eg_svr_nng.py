@@ -24,7 +24,7 @@ import pynng
 
 DATE = "DATE"
 
-address = "ipc:///tmp/wtf.ipc"
+# address = "ipc:///tmp/wtf.ipc"
 #'tcp://127.0.0.1:5555'
 
 o_globals = {"__builtins__":{
@@ -36,6 +36,7 @@ o_globals = {"__builtins__":{
 # TODO KeyboardInterrupt => quit
 
 async def handle_data(ctx,data):
+    log1('#');flush1()
 
     try:
       rt = await myevalasync(data,o_globals)
@@ -73,4 +74,7 @@ logging.basicConfig(level=logging.DEBUG)
 warnings.resetwarnings()
 """
     #logging.basicConfig(level=logging.DEBUG)
+
+    address = argv[1]
+    print('address=',address)
     asyncio_run(main_async(address))

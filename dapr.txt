@@ -1,0 +1,14 @@
+# download bundle for offline install
+https://github.com/dapr/installer-bundle/releases
+# exstract and then install from it, slim means no redis etc.
+dapr init --slim --from-dir .
+
+# quit hello world
+
+dapr run --app-id myapp --dapr-http-port 3500
+
+
+curl -X POST -H "Content-Type: application/json" -d '[{ "key": "dapr", "value": "Hello World"}]'  http://localhost:3500/v1.0/state/statestore
+
+curl http://localhost:3500/v1.0/state/statestore/dapr
+{"errorCode":"ERR_STATE_STORE_NOT_CONFIGURED","message":"state store is not configured"}

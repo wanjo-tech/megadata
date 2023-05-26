@@ -9,6 +9,8 @@ hook_quit(on_quit_default)
 from megadata.myeval import myeval,myevalasync,fwdapi
 
 url = 'tcp://*:5555'
+# windows not support ipc:// but nng do ??
+#url = 'ipc:///tmp/wtf.ipc'
 
 import asyncio
 if sys.platform=='win32':
@@ -27,6 +29,7 @@ get_builtins_default = lambda:{
   'print':print,
 }
 
+import pickle
 async def main(get_builtins=get_builtins_default):
     sock = ctx.socket(zmq.REP)
     sock.bind(url)
@@ -44,7 +47,10 @@ async def main(get_builtins=get_builtins_default):
         else: rt = rt_eval
         if type(rt) not in [str,bytes]:
           rt = tryx(lambda:pickle.dumps(rt),True)
-        await sock.send_string(rt)
+        if type(rt) is str:
+          await sock.send_string(rt)
+        else:
+          await sock.send(rt)
 
 if __name__ == '__main__':
     asyncio.run(main())

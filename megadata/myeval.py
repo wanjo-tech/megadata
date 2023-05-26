@@ -110,9 +110,4 @@ def myeval(s,g={},l={},debug=False):
             return [call_id,rt]
     else: return rt
 
-#async def myevalasync(*args,**kwargs):
-#  # return await try_await( await try_asyncio_async(lambda:myeval(*args,**kwargs)) )
-#  rt = await try_asyncio_async(lambda:myeval(*args,**kwargs))
-#  if is_awaitable(rt): rt = await rt
-#  return rt
 myevalasync = lambda *args,**kwargs:try_asyncio_async(lambda:myeval(*args,**kwargs))

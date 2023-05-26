@@ -389,7 +389,6 @@ async def parallelx(async_func, a, pool_size=None, timeout=30):
         return await gather(*tasks)
 
 from inspect import isawaitable as is_awaitable
-#is_awaitable = lambda obj: iscoroutinefunction(obj) or iscoroutine(obj)
 
 async def try_await(o):
   rt = o
@@ -399,13 +398,6 @@ async def try_await(o):
 
 try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
 
-# NOTES: try_asyncio() return a "Future" obj which is not good for run_until_complete(), so here try_asyncio_async()
-#async def try_asyncio_async(sync_func,new=False): return await try_asyncio(sync_func,new)
-#async def try_asyncio_async(sync_func,new=False):
-#  rt = await try_asyncio(sync_func,new)
-#  while is_awaitable(rt):
-#    rt = await rt
-#  return rt
 async def try_asyncio_async(sync_func,new=False): return await try_await(try_asyncio(sync_func,new))
 
 # somehow like asyncio_run

@@ -1,15 +1,11 @@
-# eval tool by wanjo 20230511
+# eval tool by wanjo 20230527
 from .mypy import *
 load_time = now()
 
-# TODO:
-# loadapi(c,m,request=request)(*args,**kwargs)
-# fix lambda:__builtins__ bug??
-
-# old way, deprecated, will remove soon
+# old way, deprecated
 def fwd(c,m,param_a): return tryx(lambda:getattr(sys_import(c).api(param_a),m)(*param_a),lambda ex:{'errmsg':str(ex)})
 
-# working version but not yet support server objects
+# working version but not yet support server objects, mostly used by 'api' in o_globals
 def fwdapi(c,m,*args,**kwargs):
   rt = tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
   #print('DEBUG fwdapi',[c,m,args],'=>',rt)
@@ -27,7 +23,12 @@ def myeval(s,g={},l={},debug=False):
         if o is None: # try rpc function...
             o = tryx(lambda:loads_func(s,g)) # load by ctx g
             if o is not None:
-              return tryx(o,True)
+              #return tryx(o,True)
+              # 2023-05-27 fix for async
+              rt = tryx(o,True)
+              if is_awaitable(rt):
+                rt = run_until_complete(try_await(rt))
+              return rt
         s = o
 
     s = f'{s}'.strip()
@@ -37,10 +38,10 @@ def myeval(s,g={},l={},debug=False):
     call_id = None
     call_param = None
     call_style = None
+    call_entry = None
     #if type(a) is list: # list-come-list-go
 
-    if s[0]=='[':
-        # list mode w+/- call_id
+    if s[0]=='[': # list mode w+/- call_id
         # [ call_id:Optional, call_entry, [call_param...] ]
         # => [call_param, call_result]
 
@@ -58,20 +59,16 @@ def myeval(s,g={},l={},debug=False):
     elif s[0]=='(' or s[0]=='/': # pyql ;)
         s=s.replace('__builtins__','') # safe-guard ;)
         if s[0]=='/': s = s[1:]
-        #return str(tryx(lambda:eval(s,g,l),True)) # DEBUG: testing no str...
-        #return tryx(lambda:eval(s,g,l),True)
         rt = tryx(lambda:eval(s,g,l),True)
-        #return rt
 
-    # dict-come-dict-go, old and please try not to use...
-    elif s[0]=='{':
+    elif s[0]=='{': # dict-come-dict-go, old and please try not to use...
         # deprecated ,dict mode is not good too
         call_style = 2
         call_entry = a.get('entry',None)
         call_param = a.get('param',[])
         call_id = a.get('id',None)
 
-    elif a is None: # assume: simple quick console mode sep by comma
+    elif a is None: # simple quick console mode sep by comma
         call_style = 3
         s=s.replace('\t','')
         a = s.split(',')
@@ -86,14 +83,11 @@ def myeval(s,g={},l={},debug=False):
             call_entry = a[0]
             call_param = tryx(lambda:a[1:],False)
 
-    if rt is None:
+    if rt is None and call_style is not None:
         a = call_entry.split('.')
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
         else:
-            # TODO remove fwd() and using fwdapi instead...
-            # TMP fwd to api{c}.m(call_param)
-            # TODO should using *args,**kwargs
             rt = fwd(f'api{a[0]}',a[1],call_param)
 
     #if is_awaitable(rt): return rt
@@ -110,4 +104,5 @@ def myeval(s,g={},l={},debug=False):
             return [call_id,rt]
     else: return rt
 
+# in some case, myeval() blocks, for example os.sleep(), try_asyncio_async can help
 myevalasync = lambda *args,**kwargs:try_asyncio_async(lambda:myeval(*args,**kwargs))

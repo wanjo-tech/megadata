@@ -30,7 +30,6 @@ def handle_ipc(param):
     # client could be None when it came from local...
     assert client is None or len(client)==0 or (white_list is None) or (white_list and client[0] in white_list), f'banned {client}'
 
-    loop = new_event_loop()
     # TODO if closed
     while True:
       #print('recv[')
@@ -45,11 +44,7 @@ def handle_ipc(param):
         #print('close]')
         break
 
-      #print('TMP DEBUG handle_ipc',data)
-
-      rt_eval = tryx(lambda:loop.run_until_complete(myevalasync(data,{"__builtins__":get_builtins()},{})),True)
-
-      #print('TMP DEBUG rt_eval',rt_eval)
+      rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
 
       if type(rt_eval) in [list,tuple,dict]:
         #rt = my_encode(rt_eval)

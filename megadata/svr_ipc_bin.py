@@ -68,10 +68,6 @@ def handle_ipc(param):
     #tryx(conn.close)
     #return rt
 
-def on_quit(*a):
-  print('on_quit',a)
-  os._exit(0)
-
 """
 ipc svr as example and quick usage only
 mode: thread | asyncio | pool
@@ -98,7 +94,7 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,g
         #print('server.last_accepted',server.last_accepted)
         try_asyncio(lambda:handle_ipc((conn,server.last_accepted,get_builtins)),new=True)
 
-  else:# pool mode
+  else:# 'pool' mode
 
     if svr_mode=='ipcm':# multiprocess-mode
       from multiprocessing import Pool
@@ -111,19 +107,10 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,g
         if conn is None: print('.')
         else: pool.map_async(handle_ipc, [(conn,server.last_accepted,get_builtins)])
 
-def start_stdin(get_builtins=get_builtins_default):
-  #for line in sys.stdin: print(myeval(line))
-  loop = new_event_loop()
-  for line in sys.stdin:
-    if line.startswith(';'): # god mode (danger for no masking __builtins__)
-      print(tryx(lambda:loop.run_until_complete(myevalasync(line[1:])) ))
-    else: # craft mode
-      r = tryx(lambda:loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{})))
-      print(type(r),r)
 
 # quick test on main
 if __name__ == '__main__':
-  hook_quit(on_quit)
+  hook_quit()
 
   address = build_address(argv[1], argv[2] if argc>2 else None)
   print('listening',address)

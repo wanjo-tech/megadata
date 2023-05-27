@@ -2,16 +2,15 @@
 from .mypy import *
 load_time = now()
 
-# old way, deprecated
-def fwd(c,m,param_a): return tryx(lambda:getattr(sys_import(c).api(param_a),m)(*param_a),lambda ex:{'errmsg':str(ex)})
+import logging
+logger = logging.getLogger(__name__)
 
-# working version but not yet support server objects, mostly used by 'api' in o_globals
-def fwdapi(c,m,*args,**kwargs):
-  rt = tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
-  #print('DEBUG fwdapi',[c,m,args],'=>',rt)
-  return rt
+#def fwdapi(c,m,*args,**kwargs):
+#  return tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
+#fwdapi = lambda c,m,*args,**kwargs:tryx(lambda:useapi(f'api{c}',m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
+fwdapi = lambda c,m,*args,**kwargs:useapi(f'api{c}',m)(*args,**kwargs)
 
-def myeval(s,g={},l={},debug=False):
+def myeval(s,g={},l={}):
     rt = None
 
     if type(s) is bytes: # try pickle/loads_func/...
@@ -34,7 +33,10 @@ def myeval(s,g={},l={},debug=False):
     s = f'{s}'.strip()
     if len(s)<1: return None
     a = s2o(s)
-    if debug: print(f'===In: {a or s}')
+
+    if logger.level>=logging.DEBUG:
+        logger.debug(f'===In: {a or s}')
+
     call_id = None
     call_param = None
     call_style = None
@@ -88,14 +90,17 @@ def myeval(s,g={},l={},debug=False):
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
         else:
-            rt = fwd(f'api{a[0]}',a[1],call_param)
+            #rt = fwd(f'api{a[0]}',a[1],call_param) # removed old
+            rt = fwdapi(a[0],a[1],*call_param)
 
     #if is_awaitable(rt): return rt
     # 2023-05-24 make the async-awaitable to sync
     if is_awaitable(rt):
       rt = run_until_complete(try_await(rt))
 
-    if debug:print(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
+    if logger.level>=logging.DEBUG:
+      #logger.debug(f'===Out <{type(rt).__name__}>',len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt)
+      logger.debug(f"===Out <{type(rt).__name__}> {len(rt) if type(rt) in [bytes,str,dict,list,tuple] else rt}")
 
     if call_style==1: # list-in-list-out mode
         if call_id is None:
@@ -106,3 +111,14 @@ def myeval(s,g={},l={},debug=False):
 
 # in some case, myeval() blocks, for example os.sleep(), try_asyncio_async can help
 myevalasync = lambda *args,**kwargs:try_asyncio_async(lambda:myeval(*args,**kwargs))
+
+def start_stdin(get_builtins):
+  #for line in sys.stdin: print(myeval(line))
+  loop = new_event_loop()
+  for line in sys.stdin:
+    if line.startswith(';'): # god mode (danger for no masking __builtins__)
+      print(tryx(lambda:loop.run_until_complete(myevalasync(line[1:])) ))
+    else: # craft mode
+      r = tryx(lambda:loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{})))
+      print(type(r),r)
+

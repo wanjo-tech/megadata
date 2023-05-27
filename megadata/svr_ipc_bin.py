@@ -2,7 +2,7 @@
 
 # server ipc mode (return str or json-str only)
 
-# TODO merge logic with svr_ipcx.py => svr_ipc_bin.py [ipc/ipcx]
+# TODO merge logic with svr_ipcm.py => svr_ipc_bin.py [ipc/ipcm]
 
 from .mypy import *
 from .myeval import myeval,myevalasync,fwdapi
@@ -75,7 +75,7 @@ def on_quit(*a):
 """
 ipc svr as example and quick usage only
 mode: thread | asyncio | pool
-svr_mode: ipc | ipcx
+svr_mode: ipc | ipcm
 """
 def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,get_builtins=get_builtins_default,debug=False):
 
@@ -100,7 +100,7 @@ def my_main_ipc(address,svr_mode='ipc',authkey=None,mode='pool',pool_size=None,g
 
   else:# pool mode
 
-    if svr_mode=='ipcx':# multiprocess-mode
+    if svr_mode=='ipcm':# multiprocess-mode
       from multiprocessing import Pool
     else: # multithread-mode
       from multiprocessing.dummy import Pool

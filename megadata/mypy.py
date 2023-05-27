@@ -176,12 +176,25 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
   if close: tryx(conn.close)
   #print('dbg.ipc<=',type(rt))
   if isinstance(rt, bytes):
-    rt_loads = b2o(rt)
-    #print('dbg.ipc',type(rt_loads),len(rt))
-    return rt_loads
+    rt_loads = tryx(lambda:b2o(rt))
+    if rt_loads is not None: return rt_loads
   return rt
 
 build_api_closure=lambda *args,**kwargs:eval(f'lambda:api(*{args},**{kwargs})')
+
+# 2023-05-27 quick nng client replacing ipc()
+## TODO timeout and out
+def nng(address,data,authkey=None,out=None,timeout=7):
+  import pynng
+  with pynng.Req0(dial=address) as sock:
+    if type(data) is str: data = data.encode()
+    sock.send(data)
+    b = sock.recv()
+    s = tryx(lambda:b.decode(),False) # check if b-str
+    if s is not None: return s
+    o = tryx(lambda:b2o(b),False) # or check from o2b()
+    if o is not None: return o
+    return b # raw anyway
 
 def rpc(u,authkey=None,out=None,timeout=7):
   def rpc_func(*rpc_args,**rpc_kwargs):
@@ -411,6 +424,7 @@ def run_until_complete(fn,new=True,timeout=0):
 ipcx = lambda *args,**kwargs:try_asyncio_async(lambda:ipc(*args,**kwargs))
 wcx = lambda *args,**kwargs:try_asyncio_async(lambda:wc(*args,**kwargs))
 sleepx = lambda *args:try_asyncio_async(lambda:sleep(*args))
+nngx = lambda *args,**kwargs:try_asyncio_async(lambda:nng(*args,**kwargs))
 
 def rpcx(u,authkey=None,out=None,timeout=7):
   async def rpc_func(*rpc_args,**rpc_kwargs):

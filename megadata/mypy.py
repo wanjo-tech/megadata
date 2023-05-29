@@ -175,9 +175,12 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
     raise ex
   if close: tryx(conn.close)
   #print('dbg.ipc<=',type(rt))
+
   if isinstance(rt, bytes):
-    rt_loads = tryx(lambda:b2o(rt))
-    if rt_loads is not None: return rt_loads
+    try:
+      rt = b2o(rt)
+    except Exception as ex:
+      pass
   return rt
 
 build_api_closure=lambda *args,**kwargs:eval(f'lambda:api(*{args},**{kwargs})')

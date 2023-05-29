@@ -196,6 +196,7 @@ def nng(address,data,authkey=None,out=None,timeout=7):
     if o is not None: return o
     return b # raw anyway
 
+# lab for lambda + ipc
 def rpc(u,authkey=None,out=None,timeout=7):
   def rpc_func(*rpc_args,**rpc_kwargs):
     c = build_api_closure(*rpc_args,**rpc_kwargs)

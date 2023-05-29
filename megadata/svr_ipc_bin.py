@@ -10,8 +10,6 @@ from .myeval import myeval,myevalasync,fwdapi
 white_list = tryx(lambda:load('../tmp/white_list.json'))
 black_list = tryx(lambda:load('../tmp/black_list.json')) or []
 
-#my_encode = lambda rt: o2s(rt) if type(rt) is not str else rt
-
 get_builtins_default = lambda:{
   #'type':type,# directly exposing type is dangerous ;)
   'type':lambda v:str(type(v)), # safer
@@ -20,53 +18,32 @@ get_builtins_default = lambda:{
   'print':print,
 }
 
-import pickle
-
-# TODO: merge handle_ipc and my_main_ipc as new class later, and then add debug=False
-
 def handle_ipc(param):
-    #print('param=',param)
     conn,client,get_builtins = param
-    # client could be None when it came from local...
+
+    # NOTES: client could be None when it came from local...
     assert client is None or len(client)==0 or (white_list is None) or (white_list and client[0] in white_list), f'banned {client}'
 
-    # TODO if closed
     while True:
-      #print('recv[')
-      #EOFError
-      #data = tryx(conn.recv,lambda ex:print(ex,client))
       data = tryx(conn.recv,lambda ex:(log1('#'),flush1()))
-      #print('recv]')
       if data is None:
-        #print('break')
-        #print('close[')
         tryx(conn.close)
-        #print('close]')
         break
 
-      rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
+      rt = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
 
-      if type(rt_eval) in [list,tuple,dict]:
-        #rt = my_encode(rt_eval)
-        rt = o2s(rt_eval)
-        #print('debug rt_eval',data,type(rt_eval),type(rt),rt)
-        if rt is None or "null"==rt: rt = rt_eval
-      else: rt = rt_eval
-      #print('debug rt_eval',data,type(rt_eval),type(rt),rt)
+      # rt_eval = tryx(lambda:myeval(data,{"__builtins__":get_builtins()},{}),True)
+      # if type(rt_eval) in [list,tuple,dict]:
+      #   rt = o2s(rt_eval)
+      #   #print('debug rt_eval',data,type(rt_eval),type(rt),rt)
+      #   if rt is None or "null"==rt: rt = rt_eval
+      # else: rt = rt_eval
+      # #print('debug rt_eval',data,type(rt_eval),type(rt),rt)
 
       if type(rt) not in [str,bytes]:
-        rt = tryx(lambda:pickle.dumps(rt),True)
+        rt = tryx(lambda:o2b(rt),True)
 
-      # https://docs.python.org/3/library/multiprocessing.html
       conn.send(rt)
-
-      # TODO print() will delay 25%
-      # TODO --silent
-      #print(f'{client}=>{len(rt) if len(rt)>999 else rt_eval}')
-
-    # TODO no-close if reuse is True, for now no auto close...
-    #tryx(conn.close)
-    #return rt
 
 """
 ipc svr as example and quick usage only

@@ -5,26 +5,24 @@ load_time = now()
 import logging
 logger = logging.getLogger(__name__)
 
-#def fwdapi(c,m,*args,**kwargs):
-#  return tryx(lambda:getattr(sys_import(f'api{c}').api(),m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
-#fwdapi = lambda c,m,*args,**kwargs:tryx(lambda:useapi(f'api{c}',m)(*args,**kwargs),lambda ex:{'errmsg':str(ex)})
-fwdapi = lambda c,m,*args,**kwargs:useapi(f'api{c}',m)(*args,**kwargs)
+# fwdapi = lambda c,m,*args,**kwargs:useapi(f'api{c}',m)(*args,**kwargs)
+def fwdapi(c,m,*args,**kwargs):
+  rt = useapi(f'api{c}',m)(*args,**kwargs)
+  if is_awaitable(rt):
+    rt = run_until_complete(try_await(rt))
+  return rt
 
 def myeval(s,g={},l={}):
     rt = None
 
     if type(s) is bytes: # try pickle/loads_func/...
-        import pickle
-        # try pickle...
-        o = tryx(lambda:pickle.loads(s),False)
-        if o is None: # not pickle, try bytes str
+        o = tryx(lambda:b2o(s),False)
+        if o is None: # not pickle, try bytes-utf8-str
             o = tryx(lambda:s.decode(),False)
         if o is None: # try rpc function...
-            o = tryx(lambda:loads_func(s,g)) # load by ctx g
-            if o is not None:
-              #return tryx(o,True)
-              # 2023-05-27 fix for async
-              rt = tryx(o,True)
+            oo = tryx(lambda:loads_func(s,g)) # load by ctx g
+            if oo is not None:
+              rt = tryx(oo,True)
               if is_awaitable(rt):
                 rt = run_until_complete(try_await(rt))
               return rt
@@ -32,8 +30,8 @@ def myeval(s,g={},l={}):
 
     s = f'{s}'.strip()
     if len(s)<1: return None
-    a = s2o(s)
 
+    a = s2o(s)
     if logger.level>=logging.DEBUG:
         logger.debug(f'===In: {a or s}')
 
@@ -90,10 +88,8 @@ def myeval(s,g={},l={}):
         if len(a)<2:
             rt = {'errmsg':'wrong entry {}'.format(call_entry)}
         else:
-            #rt = fwd(f'api{a[0]}',a[1],call_param) # removed old
             rt = fwdapi(a[0],a[1],*call_param)
 
-    #if is_awaitable(rt): return rt
     # 2023-05-24 make the async-awaitable to sync
     if is_awaitable(rt):
       rt = run_until_complete(try_await(rt))

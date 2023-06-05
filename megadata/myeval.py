@@ -108,7 +108,9 @@ def myeval(s,g={},l={}):
 # in some case, myeval() blocks, for example os.sleep(), try_asyncio_async can help
 myevalasync = lambda *args,**kwargs:try_asyncio_async(lambda:myeval(*args,**kwargs))
 
+# for server stdin quick-sheel mode ;)
 def start_stdin(get_builtins):
+  print('get_builtins()=',get_builtins())
   #for line in sys.stdin: print(myeval(line))
   loop = new_event_loop()
   for line in sys.stdin:

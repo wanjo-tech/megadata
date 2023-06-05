@@ -1,4 +1,4 @@
-condat activate megadata
+conda activate megadata
 
 python -m twine upload --verbose dist/*
 if %errorlevel% == 0 (

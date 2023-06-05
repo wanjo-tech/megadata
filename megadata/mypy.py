@@ -200,13 +200,8 @@ def nng(address,data,authkey=None,out=None,timeout=7):
     return b # raw anyway
 
 # lab for lambda + ipc
-def rpc(u,authkey=None,out=None,timeout=7):
-  def rpc_func(*rpc_args,**rpc_kwargs):
-    c = build_api_closure(*rpc_args,**rpc_kwargs)
-    b = dumps_func(c)
-    s=ipc(u,b,authkey=authkey,out=out,timeout=timeout)
-    return s2o(s)
-  return rpc_func
+# e.g. rpc(build_address(3388))('Adm','ping')
+rpc = lambda u,authkey=None,out=None,timeout=7:(lambda *rpc_args,**rpc_kwargs:ipc(u,dumps_func(build_api_closure(*rpc_args,**rpc_kwargs)),authkey=authkey,out=out,timeout=timeout))
 
 read = lambda f,m='r',encoding='utf-8':open(f,m,encoding=encoding).read()
 # for binary: write(f,s,'wb',None)

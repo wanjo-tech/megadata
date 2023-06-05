@@ -1,3 +1,5 @@
+import common
+
 #from megadata.mypy import *
 from megadata.myeval import *
 import asyncio
@@ -10,13 +12,7 @@ def clt_nng(argv):
   address = argv[1]
   print('address=',address)
 
-  socket = pynng.Req0()
-  socket.dial(address)
-
-  def server(v):
-    if type(v) is str: v = v.encode()
-    socket.send(v)
-    return socket.recv()
+  server = lambda v:nng(address,v)
 
   import pickle
   for line in sys.stdin:

@@ -1,4 +1,5 @@
-python -m pip install -U -i https://pypi.tuna.tsinghua.edu.cn/simple twine
+condat activate megadata
+
 python -m twine upload --verbose dist/*
 if %errorlevel% == 0 (
 del /f /q dist\*

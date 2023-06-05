@@ -1,2 +1,4 @@
-python -m pip install --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple build
+conda activate megadata
+
 python -m build
+

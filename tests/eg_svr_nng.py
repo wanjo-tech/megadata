@@ -1,6 +1,6 @@
 if __name__ == "__main__":
   # fix path for tests
-  from common import *
+  import common
 
   from megadata.svr_nng import *
   hook_quit()

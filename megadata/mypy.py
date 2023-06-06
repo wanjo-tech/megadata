@@ -185,10 +185,16 @@ def ipc(u,data,authkey=None,out=None,timeout=7):
 
 build_api_closure=lambda *args,**kwargs:eval(f'lambda:api(*{args},**{kwargs})')
 
-# 2023-05-27 quick nng client replacing ipc()
-## TODO timeout and out
+## TODO timeout and out not yet
 def nng(address,data,authkey=None,out=None,timeout=7):
   import pynng
+  if type(address) in [tuple,list]: # assume from build_address()
+    #print(type(address),address)
+    len_address = len(address)
+    host = address[0]
+    port = address[1]
+    protocol = address[2] if len_address>2 else 'tcp'
+    address = f'{protocol}://{host}:{port}'
   with pynng.Req0(dial=address) as sock:
     if type(data) is str: data = data.encode()
     sock.send(data)

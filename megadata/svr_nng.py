@@ -11,8 +11,6 @@ from .myeval import *
 
 load_time = now()
 
-import pynng
-
 get_builtins_default=lambda:{
   'type':lambda v:str(type(v)), # safer
   'api':fwdapi,
@@ -30,6 +28,7 @@ async def handle_nng(ctx,data,get_builtins):
   #return rt
 
 async def my_main_nng_async(address,get_builtins):
+  import pynng
   if type(address) in [tuple,list]: # assume from build_address()
     #print(type(address),address)
     len_address = len(address)

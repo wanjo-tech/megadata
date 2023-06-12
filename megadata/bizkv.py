@@ -131,7 +131,7 @@ def kv_data_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
   if pagesize > 99999: pagesize = 99999
   def _with(cache):
     loads = cache.get
-    return [(k,loads(k,r),l) for k,l,r in cache._sql("select key,store_time,raw from cache where store_time > ? ORDER BY key LIMIT ?",[lmt,pagesize]).fetchall()]
+    return [(k,loads(k,r),l) for k,l,r in cache._sql("select key,store_time,raw from cache where store_time > ? ORDER BY store_time LIMIT ?",[lmt,pagesize]).fetchall()]
 
   if cache:
     return tryx(lambda:_with(cache))
@@ -141,7 +141,7 @@ def kv_data_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
     return tryx(lambda:_with(cache))
 
 def kv_data(pool,lmt=0,pagesize=99999,folder='../tmp'):
-  print('kv_data() is deprecated!')
+  print('kv_data() is deprecated!') # o={k:c[k] for k in c}
   pagesize=int(pagesize)
   if pagesize > 99999: pagesize = 99999
   def _with(cache):

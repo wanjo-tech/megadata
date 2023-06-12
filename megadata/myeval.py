@@ -117,6 +117,9 @@ def start_stdin(get_builtins):
     if line.startswith(';'): # god mode (danger for no masking __builtins__)
       print(tryx(lambda:loop.run_until_complete(myevalasync(line[1:])) ))
     else: # craft mode
-      r = tryx(lambda:loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{})))
+      try:
+        r = loop.run_until_complete(myevalasync(line,{"__builtins__":get_builtins()},{}))
+      except Exception as ex:
+        r = ex
       print(type(r),r)
 

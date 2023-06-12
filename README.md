@@ -12,9 +12,16 @@ python -m pip install -U megadata
 
 # TODO
 
-## client shell for databases or servers ;)
-* python -m megadata *args **kwargs
+## more server/client shell for databases or servers ;)
+"""
+python -m megadata *args **kwargs
 
-# NOTES:
+e.g.
 
-## 1. for fastapi server, some "blocking" func need to wrap with try_asyncio
+## start quick web on 127.0.0.1:80
+-m megadata svrweb 80
+
+## start quick nng on tcp://127.0.0.1:3366
+-m megadata svrweb 3366
+"""
+

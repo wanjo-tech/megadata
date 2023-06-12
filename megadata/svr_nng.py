@@ -1,31 +1,33 @@
-# INSTALL 
-# pip install -U pynng
+# DEPENDS
+#   pip install -U pynng
+# NOTES
+#   zmq(zeromq) => nanomsg(github/nanomsg/nanomsg) => nng(nanomsg-next-gen,github/nanomsg/nng)
+#   https://nanomsg.org/gettingstarted/index.html
+#   https://github.com/codypiersall/pynng/
 
-# NOTES: 
-# zmq(zeromq) => nanomsg(github.com/nanomsg/nanomsg) => nng(nanomsg-next-gen,github.com/nanomsg/nng)
-# https://nanomsg.org/gettingstarted/index.html
-# https://github.com/codypiersall/pynng/
-
-#from megadata.myeval import *
 from .myeval import *
 
 load_time = now()
 
 get_builtins_default=lambda:{
-  'type':lambda v:str(type(v)), # safer
+  'type':lambda v:str(type(v)), # safety
   'api':fwdapi,
   'ping':now(),
   'print':print,
 }
 
+#async def tryxp(l,e=print):
+#    try: return await try_await(l)
+#    except Exception as ex: return ex if True==e else e(ex) if e else None
+
 async def handle_nng(ctx,data,get_builtins):
+  #rt = await tryxp(myevalasync(data,{'__builtins__':get_builtins()))
   try:
     rt = await myevalasync(data,{'__builtins__':get_builtins()})
   except Exception as ex:
-    rt = {'errmsg':str(ex)}
+    rt = ex
   rt = rt.encode() if type(rt) in [str] else o2b(rt) if type(rt) not in [bytes] else rt
   await ctx.asend(rt)
-  #return rt
 
 async def my_main_nng_async(address,get_builtins):
   import pynng

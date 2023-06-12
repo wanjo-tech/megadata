@@ -413,6 +413,10 @@ async def try_await(o):
     rt = await rt
   return rt
 
+async def tryxp(l,e=print):
+    try: return await try_await(l)
+    except Exception as ex: return ex if True==e else e(ex) if e else None
+
 try_asyncio = lambda sync_func,new=False,executor=None:(new_event_loop if new else get_event_loop)().run_in_executor(executor,sync_func)
 
 async def try_asyncio_async(sync_func,new=False): return await try_await(try_asyncio(sync_func,new))

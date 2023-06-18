@@ -359,6 +359,11 @@ def build_address(arg1,arg2=None,folder='../tmp/'):
   return address
 
 import subprocess
+def passthrough(cmd,shell=True,stdout=sys.stdout,stderr=sys.stderr,wait=True):
+  rt = subprocess.Popen(cmd,shell=shell,stdout=stdout,stderr=stderr)
+  if wait: return rt.wait()
+  return rt
+
 #def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE,creationflags=0x08000000):
 #  _stdout = sys.stdout if stdout is None else stdout
 #  with subprocess.Popen(cmd, stdout=_stdout, stdin=subprocess.PIPE,creationflags=creationflags) as p:

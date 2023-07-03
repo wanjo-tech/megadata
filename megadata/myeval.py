@@ -1,4 +1,7 @@
 # eval tool by wanjo 20230527
+# TODO is_awaitable need while-loop
+# TODO merge codes to more elegant..
+
 from .mypy import *
 load_time = now()
 

@@ -190,13 +190,12 @@ def kv_get(pool,k,folder='../tmp'):
   if True:
     return tryx(lambda:cache.get(str(k)),False)
 
-# => lmt,val
-def kv_get_lmt(pool,k,folder='../tmp'):
+def kv_get_kvl(pool,k,folder='../tmp'):
   #with Cache(f'{folder}/{pool}') as cache:
   cache = Cache(f'{folder}/{pool}')
   if True:
     for kk,l,r in cache._sql("select key,store_time,raw from cache where key = ?",[k]):
-      return l,cache.get(kk,r)
+      return k,cache.get(kk,r),l
 
 def kv_del(pool,k,folder='../tmp'):
   with Cache(f'{folder}/{pool}') as cache:
@@ -260,14 +259,17 @@ class kvstore():
   def kv_data_lmt(self,lmt=0):
     return kv_data_lmt(self.pool,lmt,folder=self.folder)
 
-  def kv_get_lmt(self,k):
-    return kv_get_lmt(self.pool,k,folder=self.folder)
+  def kv_get_kvl(self,k):
+    return kv_get_kvl(self.pool,k,folder=self.folder)
 
   def kv_move(self,to_pool,k):
     return kv_move(self.pool,to_pool,k,folder=self.folder)
 
   def kv_upsert(self,k,v):
     return kv_upsert(self.pool,k,v,folder=self.folder)
+
+  def kv_set_batch(self,o,diff=False):
+    return kv_set_batch(self.pool,o,diff=diff,folder=self.folder)
 
   def __repr__(self):
     return str(self.kv_list())

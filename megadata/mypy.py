@@ -79,6 +79,7 @@ def use(mdlname,clsname=None,reload=False):
       if rt is None: break # safety
   return rt
 
+# useapi is not good for hardcoded 'api', use your own
 # e.g. func = useapi(f'api{c}',m,request=request,post_s=post_s,post_o=post_o)
 useapi = lambda c,m,*args,**kwargs: getattr(use(c,'api')(*args,**kwargs),m)
 
@@ -363,6 +364,8 @@ def passthrough(cmd,shell=True,stdout=sys.stdout,stderr=sys.stderr,wait=True):
   rt = subprocess.Popen(cmd,shell=shell,stdout=stdout,stderr=stderr)
   if wait: return rt.wait()
   return rt
+
+passthru = passthrough
 
 #def systemx(cmd,w=None,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE,creationflags=0x08000000):
 #  _stdout = sys.stdout if stdout is None else stdout

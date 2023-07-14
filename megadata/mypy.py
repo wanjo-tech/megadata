@@ -112,6 +112,7 @@ s2o = lambda s:tryx(lambda:json.loads(s),False)
 o2s = lambda o,indent=None,separators=(',',':'):tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder, separators=separators))
 
 from pickle import dumps as o2b, loads as b2o
+o2b_None = o2b(None)
 
 from urllib.request import urlopen
 def get_urlopen():
@@ -200,6 +201,7 @@ def nng(address,data,authkey=None,out=None,timeout=7):
     if type(data) is str: data = data.encode()
     sock.send(data)
     b = sock.recv()
+    if b == o2b_None: return None
     s = tryx(lambda:b.decode(),False) # check if b-str
     if s is not None: return s
     o = tryx(lambda:b2o(b),False) # or check from o2b()

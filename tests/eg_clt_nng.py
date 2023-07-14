@@ -3,7 +3,6 @@ import common
 #from megadata.mypy import *
 from megadata.myeval import *
 import asyncio
-import pynng
 
 DATE = "DATE"
 

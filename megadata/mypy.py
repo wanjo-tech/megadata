@@ -15,10 +15,12 @@ import sys
 argv = sys.argv
 argc = len(argv)
 
-log1 = sys.stdout.write
-flush1 = sys.stdout.flush
-log2 = sys.stderr.write
-flush2 = sys.stderr.flush
+if sys.stdout:
+  log1 = sys.stdout.write
+  flush1 = sys.stdout.flush
+if sys.stderr:
+  log2 = sys.stderr.write
+  flush2 = sys.stderr.flush
 
 def print1(*args):
   for v in args: log1(f'{v} ')
@@ -108,8 +110,8 @@ def delx(o,k):
 import json
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, obj): return tryx(lambda:json.JSONEncoder.default(self,obj))
-s2o = lambda s:tryx(lambda:json.loads(s),False)
-o2s = lambda o,indent=None,separators=(',',':'):tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder, separators=separators))
+s2o = lambda s,eh=False:tryx(lambda:json.loads(s),eh)
+o2s = lambda o,indent=None,separators=(',',':'),eh=print:tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder, separators=separators),eh)
 
 from pickle import dumps as o2b, loads as b2o
 o2b_None = o2b(None)

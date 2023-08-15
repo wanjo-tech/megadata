@@ -1,12 +1,12 @@
 [project]
 name = "megadata"
-version = "0.0.69"
+version = "0.0.70"
 authors = [
   { name="Wanjo Chan", email="wanjochan@gmail.com" },
 ]
 description = "tools from/for megadata"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

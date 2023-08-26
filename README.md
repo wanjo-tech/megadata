@@ -25,9 +25,9 @@ e.g.
 -m megadata svrweb 3366
 """
 
-# WARNING
+# NO WARRANT WARNING
 
-# My Software Package
+## Use at your own risk !
 
 This software package is intended for data research purposes only. It is provided as-is, without any warranties or guarantees of any kind. 
 

@@ -13,7 +13,8 @@ python -m pip install -U megadata
 # TODO
 
 ## more server/client shell for databases or servers ;)
-"""
+
+```
 python -m megadata *args **kwargs
 
 e.g.
@@ -23,7 +24,7 @@ e.g.
 
 ## start quick nng on tcp://127.0.0.1:3366
 -m megadata svrweb 3366
-"""
+```
 
 # NO WARRANT WARNING
 

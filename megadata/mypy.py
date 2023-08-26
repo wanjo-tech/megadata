@@ -453,6 +453,9 @@ def rpcx(u,authkey=None,out=None,timeout=7):
     s=await ipcx(u,b,authkey=authkey,out=out,timeout=timeout)
     return s2o(s)
   return rpc_func
+
+destructing = lambda d,k:[d[k.strip()] for k in k.split(',') if k.strip() in d]
+
 #################### DELETED
 #sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload
 #sys_import = __import__

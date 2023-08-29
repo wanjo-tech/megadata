@@ -1,14 +1,18 @@
-# megadata
+# MEGADATA
 
 lib and tools for 'megadata'
 
-# philosophy
+# PHILOSOPHY
 
 "remove if worthy"
 
-# install
+# INSTALL
 
 python -m pip install -U megadata
+
+# ROADMAP
+
+https://github.com/wanjo-tech/megadata/discussions/3
 
 # TODO
 

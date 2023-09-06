@@ -4,6 +4,8 @@
 #   zmq(zeromq) => nanomsg(github/nanomsg/nanomsg) => nng(nanomsg-next-gen,github/nanomsg/nng)
 #   https://nanomsg.org/gettingstarted/index.html
 #   https://github.com/codypiersall/pynng/
+# PROBLEM
+#   when working inside WSL1, seem the port is not correctly listened. in that case, ipc mode server is recommended.
 
 from .myeval import *
 

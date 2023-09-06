@@ -28,6 +28,8 @@ def main(argv):
   elif typ=='web':
     from .clt_web import clt_web
     clt_web(argv)
+  # TODO svr_ipc
+  # from megadata.svr_ipc_bin import my_main_ipc; my_main_ipc(('127.0.0.1',6667))
   else:
     print(f'TODO "{typ}"')
 

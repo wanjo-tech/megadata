@@ -454,7 +454,7 @@ def rpcx(u,authkey=None,out=None,timeout=7):
     return s2o(s)
   return rpc_func
 
-destructing = lambda d,k:[d[k.strip()] for k in k.split(',') if k.strip() in d]
+destruct = lambda d,k:[d.get(k.strip()) for k in k.split(',')]
 
 #################### DELETED
 #sys_reload = __builtins__.reload if flag_py2 else sys_import('importlib').reload

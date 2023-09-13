@@ -210,6 +210,28 @@ def nng(address,data,authkey=None,out=None,timeout=7):
     if o is not None: return o
     return b # raw anyway
 
+#nngx = lambda *args,**kwargs:try_asyncio_async(lambda:nng(*args,**kwargs))
+async def nngx(address,data,authkey=None,out=None,timeout=7):
+  import pynng
+  if type(address) in [tuple,list]: # assume from build_address()
+    #print(type(address),address)
+    len_address = len(address)
+    host = address[0]
+    port = address[1]
+    protocol = address[2] if len_address>2 else 'tcp'
+    address = f'{protocol}://{host}:{port}'
+  with pynng.Req0(dial=address) as sock:
+    if type(data) is str: data = data.encode()
+    await sock.asend(data)
+    b = await sock.arecv()
+    if b == o2b_None: return None
+    s = tryx(lambda:b.decode(),False) # check if b-str
+    if s is not None: return s
+    o = tryx(lambda:b2o(b),False) # or check from o2b()
+    if o is not None: return o
+    return b # raw anyway
+
+# NOETS need to wrap own rpc/rpcx
 # e.g. rpc(build_address(3388))('Adm','ping')
 rpc = lambda u,authkey=None,out=None,timeout=7:(lambda *rpc_args,**rpc_kwargs:ipc(u,dumps_func(build_api_closure(*rpc_args,**rpc_kwargs)),authkey=authkey,out=out,timeout=timeout))
 
@@ -444,7 +466,6 @@ def run_until_complete(fn,new=True,timeout=0):
 ipcx = lambda *args,**kwargs:try_asyncio_async(lambda:ipc(*args,**kwargs))
 wcx = lambda *args,**kwargs:try_asyncio_async(lambda:wc(*args,**kwargs))
 sleepx = lambda *args:try_asyncio_async(lambda:sleep(*args))
-nngx = lambda *args,**kwargs:try_asyncio_async(lambda:nng(*args,**kwargs))
 
 def rpcx(u,authkey=None,out=None,timeout=7):
   async def rpc_func(*rpc_args,**rpc_kwargs):

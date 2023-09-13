@@ -133,10 +133,8 @@ def kv_key_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
     return [(k,l) for k,l in cache._sql("select key,store_time from cache where store_time > ? ORDER BY store_time LIMIT ?",[lmt,pagesize]).fetchall()]
   if cache:
     return tryx(lambda:_with(cache))
-  #with Cache(f'{folder}/{pool}') as cache: # NOTES:'with' will auto locking...
   cache = Cache(f'{folder}/{pool}')
-  if True:
-    return tryx(lambda:_with(cache))
+  return tryx(lambda:_with(cache))
 
 # using 'store_time' as filter... returns [(k,v,l),]
 def kv_data_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
@@ -149,13 +147,11 @@ def kv_data_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
 
   if cache:
     return tryx(lambda:_with(cache))
-  #with Cache(f'{folder}/{pool}') as cache: # 'with' will auto locking...
   cache = Cache(f'{folder}/{pool}')
-  if True:
-    return tryx(lambda:_with(cache))
+  return tryx(lambda:_with(cache))
 
+# see also kv_data_lmt()
 def kv_data(pool,lmt=0,pagesize=99999,folder='../tmp'):
-  print('kv_data() is deprecated!') # o={k:c[k] for k in c}
   pagesize=int(pagesize)
   if pagesize > 99999: pagesize = 99999
   def _with(cache):
@@ -169,8 +165,8 @@ def kv_data(pool,lmt=0,pagesize=99999,folder='../tmp'):
         c+=1
         if c>pagesize: break
     return rt
-  with Cache(f'{folder}/{pool}') as cache:
-    return tryx(lambda:_with(cache))
+  cache = Cache(f'{folder}/{pool}')
+  return tryx(lambda:_with(cache))
 
 def kv_set(pool,k,v,expire=None,folder='../tmp',diff=False,debug=False):
   def _with(cache):

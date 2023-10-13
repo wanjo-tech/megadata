@@ -244,6 +244,22 @@ def kv_upsert(pool,kv_k,kv_o,folder='../tmp',debug=False):
   with Cache(f'{folder}/{pool}') as cache:
     return tryx(lambda:_with(cache))
 
+# del all under lmt; for quicker cleanup speed, useful in memfs
+def kv_del_lmt(pool,lmt,pagesize=99999,folder='../tmp',cache=None):
+  lmt=float(lmt)
+  pagesize=int(pagesize)
+  if pagesize > 99999: pagesize = 99999
+  def _with(cache):
+    c = 0
+    for k,l in cache._sql("select key,store_time from cache where store_time < ? LIMIT ?",[lmt,pagesize]).fetchall():
+      delx(cache,k)
+      c+=1
+    return c
+  if cache:
+    return tryx(lambda:_with(cache))
+  cache = Cache(f'{folder}/{pool}')
+  return tryx(lambda:_with(cache))
+
 #class kvstore(objx):# TODO
 class kvstore():
   # the address for remote store is TODO again
@@ -271,6 +287,9 @@ class kvstore():
 
   def kv_data_lmt(self,lmt=0):
     return kv_data_lmt(self.pool,lmt,folder=self.folder)
+
+  def kv_del_lmt(self,lmt):
+    return kv_del_lmt(self.pool,lmt,folder=self.folder)
 
   def kv_get_kvl(self,k):
     return kv_get_kvl(self.pool,k,folder=self.folder)

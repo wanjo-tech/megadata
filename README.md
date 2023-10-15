@@ -55,7 +55,7 @@ Please use this software package responsibly and at your own risk.
 
 # SUPPORT
 
-[BUY-ME-A-COFFE](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)
+[BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)
 
 <!--
 <script async

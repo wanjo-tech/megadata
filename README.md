@@ -53,6 +53,20 @@ Please use this software package responsibly and at your own risk.
 
 我們強烈建議不在任何關鍵或生產系統中使用此軟體包。它僅供教育、實驗和非商業目的使用。
 
+# SUPPORT
+
+[BUY-ME-A-COFFE](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)
+
+<script async
+  src="https://js.stripe.com/v3/buy-button.js">
+</script>
+
+<stripe-buy-button
+  buy-button-id="buy_btn_1O1LWzAZeDyeb7mKWtFSiHs8"
+  publishable-key="pk_live_51MtUANAZeDyeb7mKtPVXLIE7iHlW4JQ6tdlOfMDOftxjOFLZKwBy8eBo39kaCUbGhrw8FXNz5rb3Xhyr78KP40cN00KwFFgzYL"
+>
+</stripe-buy-button>
+
 请负责任地使用本软件包，并自行承担风险
 
 

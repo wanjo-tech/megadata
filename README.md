@@ -57,6 +57,7 @@ Please use this software package responsibly and at your own risk.
 
 [BUY-ME-A-COFFE](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)
 
+<!--
 <script async
   src="https://js.stripe.com/v3/buy-button.js">
 </script>
@@ -66,7 +67,7 @@ Please use this software package responsibly and at your own risk.
   publishable-key="pk_live_51MtUANAZeDyeb7mKtPVXLIE7iHlW4JQ6tdlOfMDOftxjOFLZKwBy8eBo39kaCUbGhrw8FXNz5rb3Xhyr78KP40cN00KwFFgzYL"
 >
 </stripe-buy-button>
-
+-->
 请负责任地使用本软件包，并自行承担风险
 
 

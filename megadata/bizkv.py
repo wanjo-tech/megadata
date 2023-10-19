@@ -1,68 +1,47 @@
 from .mypy import *
 
-# like Application.diff_o2o upgrade version... TODO merge then future?
+float_nan = float('nan')
 # NOTES: return True if Same else False; 'a' for quick debug stack
-
 def is_same(o1,o2,a=None,p='',ignore_na=False):
-  rt = True
+  rt = True # default same
   if type(o1)!=type(o2):
-    if a is not None: a.append(f'{p}: {o1}=>{o2}')
-    rt = False
-    if ignore_na and o2 in [None,0,0.,'0','0.']: rt=True # TODO np.nan...
-  elif type(o1) in [ list, tuple, set ]:
+    if ignore_na and o2 in [None,0,0.,'0','0.',float_nan]:
+      pass
+    else: rt = False
+    if not rt and a is not None: a.append([p,o1,o2])
+  elif isinstance(o1, (list, tuple, set)):
     list1 = list(o1)
     list2 = list(o2)
     len1 = len(list1)
     len2 = len(list2)
     if len1!=len2:
-      if a is not None: a.append(f'{p}: {list1}=>{list2}')
+      if a is not None: a.append([p,list1,list2])
       rt = False
     else:
       for i in range(len2):
         if not is_same(list1[i],list2[i],a,f'{p}/{i}',ignore_na=ignore_na):
           rt = False
           break
-    #for k in o1:
-    #  if k not in o2:
-    #    if a is not None: a.append(f'{p}: {k}=>None')
-    #    rt = False
-    #    break
-    #if rt is True:
-    #  for k in o2:
-    #    if k not in o1:
-    #      if a is not None: a.append(f'{p}: None=>{k}')
-    #      rt = False
-    #      break
-  elif type(o1) in [ dict ]:
+  elif isinstance(o1, dict):
     for k in o1:
-      v1 = tryx(lambda:o1[k],False)
-      v2 = tryx(lambda:o2[k],False)
-
-      #if False == is_same(v1, v2, a, f'{p}/{k}',ignore_na=ignore_na):
-      #    rt = False
-      #    #break
-      #    if a is not None: break
-
+      v1 = o1.get(k)
+      v2 = o2.get(k)
       dff = is_same(v1, v2, a, f'{p}/{k}', ignore_na=ignore_na)
       if dff==False: rt = False
     if rt or a is not None:
-    #if True:
         for k in o2:
           if k in o1: continue
-          v1 = tryx(lambda:o1[k],False)
-          v2 = tryx(lambda:o2[k],False)
+          v1 = o1.get(k)
+          v2 = o2.get(k)
           if False == is_same(v1, v2, a, f'{p}/{k}',ignore_na=ignore_na):
-              rt = False
-              #break
-              #if a is not None: break
-              if a is None: break
+            rt = False
+            if a is None: break
   elif o1==o2: # not ===, so should already handled the epsilon...
     pass
-  else:                       # TODO more type ...
+  else:                       # same type but not eqaul
     rt = False
-    if a is not None:
-      a.append(f'{p}: {o1}=>{o2}')
-    if ignore_na and o2 in [None,0,0.,'0','0.']: rt=True # TODO np.nan...
+    if ignore_na and o2 in [None,0,0.,'0','0.',float_nan]: rt=True
+    if not rt and a is not None: a.append([p,o1,o2])
   return rt
 
 load_time = now()
@@ -173,7 +152,7 @@ def kv_set(pool,k,v,expire=None,folder='../tmp',diff=False,debug=False):
     a = [] if debug else None
     if diff and is_same(cache.get(k),v,a): return 0
     if debug: print('kv_set',a)
-    cache.set(str(k),v,expire=expire)
+    cache.set(k,v,expire=expire)
     return 1
   with Cache(f'{folder}/{pool}') as cache:
     return tryx(lambda:_with(cache))
@@ -188,7 +167,7 @@ def kv_set_batch(pool,batch_o,expire=None,folder='../tmp',diff=False,debug=False
       if diff and is_same(cache.get(k),v,a,ignore_na=ignore_na): continue
       if debug: print('kv_set_batch',a)
       c += 1
-      cache.set(str(k),v,expire=expire)
+      cache.set(k,v,expire=expire)
     return c
     
   with Cache(f'{folder}/{pool}') as cache:
@@ -198,7 +177,7 @@ def kv_get(pool,k,folder='../tmp'):
   #with Cache(f'{folder}/{pool}') as cache:
   cache = Cache(f'{folder}/{pool}')
   if True:
-    return tryx(lambda:cache.get(str(k)),False)
+    return tryx(lambda:cache.get(k),False)
 
 def kv_get_kvl(pool,k,folder='../tmp'):
   #with Cache(f'{folder}/{pool}') as cache:
@@ -239,7 +218,7 @@ def kv_upsert(pool,kv_k,kv_o,folder='../tmp',debug=False):
           c+=1
           v_o[key] = val
           if debug: print(kv_k,key,old_v,'=>',val)
-    if c>0: cache.set(str(kv_k),v_o)
+    if c>0: cache.set(kv_k,v_o)
     return c
   with Cache(f'{folder}/{pool}') as cache:
     return tryx(lambda:_with(cache))
@@ -309,5 +288,6 @@ class kvstore():
   # for len()
   def __len__(self):
     return len(self.kv_list())
+
 
 

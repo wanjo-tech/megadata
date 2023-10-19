@@ -10,10 +10,6 @@ lib and tools for 'megadata'
 
 python -m pip install -U megadata
 
-# ROADMAP
-
-https://github.com/wanjo-tech/megadata/discussions/3
-
 # TODO
 
 ## more server/client shell for databases or servers ;)
@@ -57,7 +53,8 @@ Please use this software package responsibly and at your own risk.
 
 # SUPPORT
 
-請我喝杯咖啡 [BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)，加我VX(wanjochan)討論技術問題
+* 請我喝杯咖啡 [BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm) 
+* 加我VX(wanjochan)討論技術問題
 
 <!--
 <script async

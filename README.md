@@ -53,9 +53,11 @@ Please use this software package responsibly and at your own risk.
 
 我們強烈建議不在任何關鍵或生產系統中使用此軟體包。它僅供教育、實驗和非商業目的使用。
 
+請負責任地使用本軟件包，並自行承擔風險
+
 # SUPPORT
 
-[BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)
+請我喝杯咖啡 [BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm)，加我VX(wanjochan)討論技術問題
 
 <!--
 <script async
@@ -68,7 +70,6 @@ Please use this software package responsibly and at your own risk.
 >
 </stripe-buy-button>
 -->
-请负责任地使用本软件包，并自行承担风险
 
 
 

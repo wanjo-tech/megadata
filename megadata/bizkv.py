@@ -71,37 +71,13 @@ def kv_list(pool,lmt=0,pagesize=99999,folder='../tmp'):
   with Cache(f'{folder}/{pool}') as cache:
     return tryx(lambda:_with(cache))
 
-def kv_last(pool,folder='../tmp'):
+def kv_last(pool,limit=1,folder='../tmp'):
   with Cache(f'{folder}/{pool}') as cache:
-    return tryx(lambda:cache._sql("select key from cache ORDER BY key DESC LIMIT 1").fetchall()[0][0],False)
+    return tryx(lambda:cache._sql(f"select key from cache ORDER BY key DESC LIMIT {limit}").fetchall()[0][0],False)
 
 def kv_len(pool,folder='../tmp'):
   with Cache(f'{folder}/{pool}') as cache:
     return tryx(lambda:cache._sql("select count() from cache").fetchall())
-
-#def kv_data_lmt_old(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
-#  pagesize=int(pagesize)
-#  if pagesize > 99999: pagesize = 99999
-#  def _with(cache):
-#    c=0
-#    rt = []
-#    # TODO fix better codes here later
-#    if lmt: # TMP 
-#      it = [(cache._disk.get(k,r),l) for k,r,l in cache._sql("select key,raw,store_time from cache where store_time > ? ORDER BY key LIMIT ?",[lmt,pagesize]).fetchall()]
-#    else:
-#      it = [(cache._disk.get(k,r),l) for k,r,l in cache._sql("select key,raw,store_time from cache ORDER BY key LIMIT ?",[pagesize]).fetchall()]
-#    if it is not None:
-#      for k,l in it:
-#        v = cache.get(k)
-#        rt.append((k,v,l))
-#        c+=1
-#        if c>pagesize: break
-#    return rt
-#
-#  if cache:
-#    return tryx(lambda:_with(cache))
-#  with Cache(f'{folder}/{pool}') as cache:
-#    return tryx(lambda:_with(cache))
 
 # filter key only
 def kv_key_lmt(pool,lmt=0,pagesize=99999,folder='../tmp',cache=None):
@@ -255,32 +231,39 @@ class kvstore():
   def __delitem__(self,k):
     return tryx(lambda:kv_del(self.pool,k,folder=self.folder))
 
-  def kv_list(self,lmt=0):# keys()
-    return kv_list(self.pool,folder=self.folder)
+  def __getattr__(self,k):
+    if k.startswith('kv_'):
+      the_self = self
+      method = globals().get(k)
+      assert method, f'kvstore.{k} not found'
+      def return_fn(*args,**kwargs):
+        kwargs['folder'] = the_self.folder
+        args = [the_self.pool] + list(args)
+        return method(*args,**kwargs)
+      return return_fn
+    #print('DEBUG __getattr__',k)
+    def return_fn(*args,**kwargs):
+      assert False, f'{k} not exists'
+    return return_fn
 
-  def kv_data(self,lmt=0):# items()
-    return kv_data(self.pool,lmt,folder=self.folder)
-
-  def kv_key_lmt(self,lmt=0):
-    return kv_key_lmt(self.pool,lmt,folder=self.folder)
-
-  def kv_data_lmt(self,lmt=0):
-    return kv_data_lmt(self.pool,lmt,folder=self.folder)
-
-  def kv_del_lmt(self,lmt):
-    return kv_del_lmt(self.pool,lmt,folder=self.folder)
-
-  def kv_get_kvl(self,k):
-    return kv_get_kvl(self.pool,k,folder=self.folder)
-
-  def kv_move(self,to_pool,k):
-    return kv_move(self.pool,to_pool,k,folder=self.folder)
-
-  def kv_upsert(self,k,v):
-    return kv_upsert(self.pool,k,v,folder=self.folder)
-
-  def kv_set_batch(self,o,diff=False):
-    return kv_set_batch(self.pool,o,diff=diff,folder=self.folder)
+  #def kv_list(self,lmt=0):# keys()
+  #  return kv_list(self.pool,folder=self.folder)
+  #def kv_data(self,lmt=0):# items()
+  #  return kv_data(self.pool,lmt,folder=self.folder)
+  #def kv_key_lmt(self,lmt=0):
+  #  return kv_key_lmt(self.pool,lmt,folder=self.folder)
+  #def kv_data_lmt(self,lmt=0):
+  #  return kv_data_lmt(self.pool,lmt,folder=self.folder)
+  #def kv_del_lmt(self,lmt):
+  #  return kv_del_lmt(self.pool,lmt,folder=self.folder)
+  #def kv_get_kvl(self,k):
+  #  return kv_get_kvl(self.pool,k,folder=self.folder)
+  #def kv_move(self,to_pool,k):
+  #  return kv_move(self.pool,to_pool,k,folder=self.folder)
+  #def kv_upsert(self,k,v):
+  #  return kv_upsert(self.pool,k,v,folder=self.folder)
+  #def kv_set_batch(self,o,diff=False):
+  #  return kv_set_batch(self.pool,o,diff=diff,folder=self.folder)
 
   def __repr__(self):
     return str(self.kv_list())

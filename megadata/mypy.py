@@ -108,10 +108,10 @@ def delx(o,k):
     return o
 
 import json
-class MyJsonEncoder(json.JSONEncoder):
-    def default(self, obj): return tryx(lambda:json.JSONEncoder.default(self,obj))
+#class MyJsonEncoder(json.JSONEncoder): default = lambda self,obj:tryx(lambda:json.JSONEncoder.default(self,obj),lambda ex:str(obj))
+#o2s = lambda o,indent=None,separators=(',',':'):json.dumps(o, indent=indent, ensure_ascii=False, separators=separators, cls=MyJsonEncoder)
 s2o = lambda s,eh=False:tryx(lambda:json.loads(s),eh)
-o2s = lambda o,indent=None,separators=(',',':'),eh=print:tryx(lambda:json.dumps(o, indent=indent, ensure_ascii=False, cls=MyJsonEncoder, separators=separators),eh)
+o2s = lambda o,indent=None,separators=(',',':'):json.dumps(o, indent=indent, ensure_ascii=False, separators=separators, cls=type("MyJsonEncoder", (json.JSONEncoder,), { "default": lambda self, obj: tryx(lambda: json.JSONEncoder.default(self, obj), lambda ex: str(obj)) }))
 
 from pickle import dumps as o2b, loads as b2o
 o2b_None = o2b(None)

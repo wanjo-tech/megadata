@@ -51,13 +51,3 @@ Please use this software package responsibly and at your own risk.
 
 請負責任地使用本軟件包，並自行承擔風險
 
-# SUPPORT
-
-* 請我喝杯咖啡 [BUY-ME-A-COFFE 25 CNY](https://buy.stripe.com/4gw8xu1Ij61CbCw4gm) 
-<!--
-<script async src="https://js.stripe.com/v3/buy-button.js"> </script>
-
-<stripe-buy-button buy-button-id="buy_btn_1O1LWzAZeDyeb7mKWtFSiHs8"
-  publishable-key="pk_live_51MtUANAZeDyeb7mKtPVXLIE7iHlW4JQ6tdlOfMDOftxjOFLZKwBy8eBo39kaCUbGhrw8FXNz5rb3Xhyr78KP40cN00KwFFgzYL"
-></stripe-buy-button>
--->

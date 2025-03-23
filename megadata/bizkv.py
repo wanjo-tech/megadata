@@ -150,9 +150,9 @@ def kv_set_batch(pool,batch_o,expire=None,folder='../tmp',diff=False,debug=False
     return tryx(lambda:_with(cache))
 
 def kv_get(pool,k,folder='../tmp'):
-  #with Cache(f'{folder}/{pool}') as cache:
-  cache = Cache(f'{folder}/{pool}')
-  if True:
+  with Cache(f'{folder}/{pool}') as cache:
+  #cache = Cache(f'{folder}/{pool}')
+  #if True:
     return tryx(lambda:cache.get(k),False)
 
 def kv_get_kvl(pool,k,folder='../tmp'):

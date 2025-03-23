@@ -103,9 +103,13 @@ def tiny_email(user, mypass, sender, receiver, Subject, html, smtp_host='smtp.qq
     server.quit()
 
 ###################################### dba wrapper (using sqlalchemy)
+# NOTES: remember pipbin sqlalchemy pandas...
 #'{scheme}://{user}:{password}@{host}:{port}/{db}?charset={charset}#{fragment}'
 #'{scheme}://{netloc}@{host}:{port}/{path}?{query}#{fragment}'
-#e.g.'mysql://root:123456@127.0.0.1:3306/?charset=utf8mb4'
+# mysql://root:123456@127.0.0.1:3306/?charset=utf8mb4
+# sqlite:///:memory:
+# sqlite:///../books/test.db
+
 
 class dba:
     _ = {'_':now()}
